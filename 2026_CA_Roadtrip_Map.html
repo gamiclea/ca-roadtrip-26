@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 CA Road Trip Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<style>
+:root {
+  --ink:#1a1410; --gold:#c9922a; --goldL:#e8b84b; --paper:#f5f0e8;
+  --cream:#ede8dc; --muted:#8a8070; --border:rgba(26,20,16,0.14); --rust:#b5451b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--paper); color:var(--ink); font-family:'DM Sans',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+.tab-nav{background:var(--ink);display:flex;align-items:stretch;gap:0;padding:0 1.5rem;border-bottom:2px solid var(--gold);flex-shrink:0;}
+.tab-nav a{display:flex;align-items:center;gap:.45rem;padding:.55rem 1rem;font-family:'DM Sans',sans-serif;
+  font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;
+  color:rgba(245,240,232,.4);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab-nav a:hover{color:rgba(245,240,232,.75);}
+.tab-nav a.active{color:var(--goldL);border-bottom-color:var(--gold);}
+.tab-nav .trip-id{font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--goldL);
+  letter-spacing:.06em;margin-right:.75rem;display:flex;align-items:center;padding:.5rem 0;
+  border-right:1px solid rgba(255,255,255,.1);padding-right:1rem;}
+
+/* HEADER */
+header { background:var(--paper); padding:8px 16px; border-bottom:2px solid var(--gold); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:12px; flex-wrap:wrap; box-shadow:0 2px 8px rgba(26,20,16,0.1); z-index:10; }
+.trip-title { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--gold); letter-spacing:.06em; line-height:1; }
+.hdr-sub { font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+.hdr-btns { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.hbtn { padding:4px 12px; border-radius:3px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; cursor:pointer; transition:all .15s; font-family:'DM Sans',sans-serif; border:1px solid var(--border); background:white; color:var(--muted); }
+.hbtn:hover { border-color:var(--gold); color:var(--gold); }
+.hbtn.active { background:rgba(201,146,42,.12); border-color:var(--gold); color:var(--gold); font-weight:700; }
+
+/* STAT STRIP */
+.stat-strip { padding:5px 16px; border-bottom:1px solid var(--border); background:var(--cream); display:flex; gap:22px; flex-wrap:wrap; align-items:center; flex-shrink:0; }
+.s { display:flex; align-items:baseline; gap:4px; }
+.sn { font-family:'Bebas Neue',sans-serif; font-size:16px; color:var(--gold); }
+.sl { font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+
+/* LAYOUT */
+.main { display:flex; flex:1; overflow:hidden; }
+
+/* SIDEBAR */
+.sidebar { width:236px; flex-shrink:0; background:var(--paper); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; box-shadow:2px 0 8px rgba(26,20,16,0.06); }
+.sb-hdr { padding:8px 10px 5px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.sb-label { font-size:8px; text-transform:uppercase; letter-spacing:.14em; color:var(--ink); font-weight:700; margin-bottom:5px; }
+.sb-all { padding:5px 8px; border-radius:3px; cursor:pointer; margin-bottom:2px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; border:1px solid transparent; transition:all .15s; color:var(--muted); }
+.sb-all.active { background:rgba(201,146,42,.1); border-color:rgba(201,146,42,.4); color:var(--gold); }
+.sb-all:hover:not(.active) { background:rgba(201,146,42,.05); }
+.day-list { overflow-y:auto; flex:1; padding:4px 6px; }
+.day-list::-webkit-scrollbar { width:3px; }
+.day-list::-webkit-scrollbar-thumb { background:rgba(201,146,42,.25); border-radius:2px; }
+.day-item { padding:5px 8px; border-radius:4px; cursor:pointer; margin-bottom:2px; border:1px solid transparent; transition:all .12s; }
+.day-item:hover { background:rgba(201,146,42,.07); }
+.day-item.active { background:rgba(201,146,42,.1); border-color:rgba(201,146,42,.3); }
+.di-row { display:flex; align-items:center; gap:5px; }
+.di-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.di-num { font-family:'Bebas Neue',sans-serif; font-size:13px; line-height:1; }
+.di-mi { font-size:9px; color:var(--muted); margin-left:auto; }
+.di-date { font-size:8px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1px 0 1px 12px; }
+.di-route { font-size:10px; color:var(--muted); margin:1px 0 0 12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:188px; }
+.day-item.active .di-route { color:var(--ink); }
+
+/* MAP */
+#map { flex:1; position:relative; }
+.mapboxgl-canvas { outline:none; }
+
+/* POPUP */
+.mapboxgl-popup-content { background:rgba(245,240,232,0.98) !important; border:1px solid rgba(201,146,42,.35) !important; border-radius:6px !important; padding:10px 14px !important; box-shadow:0 4px 16px rgba(26,20,16,.18) !important; color:var(--ink) !important; font-family:'DM Sans',sans-serif !important; min-width:180px; }
+.mapboxgl-popup-tip { border-top-color:rgba(245,240,232,0.98) !important; border-bottom-color:rgba(245,240,232,0.98) !important; }
+.pu-day { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); font-weight:700; margin-bottom:3px; }
+.pu-name { font-size:13px; font-weight:600; margin-bottom:2px; line-height:1.3; color:var(--ink); }
+.pu-type { font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+.pu-time { font-size:10px; color:var(--gold); margin-top:4px; }
+
+/* DETAIL PANEL */
+.detail-panel { position:absolute; top:12px; right:12px; width:280px; background:rgba(245,240,232,0.98); border:1px solid rgba(201,146,42,.35); border-radius:8px; padding:14px; z-index:5; box-shadow:0 4px 20px rgba(26,20,16,.18); display:none; max-height:calc(100vh - 120px); overflow-y:auto; color:var(--ink); }
+.detail-panel.show { display:block; }
+.detail-panel::-webkit-scrollbar { width:3px; }
+.detail-panel::-webkit-scrollbar-thumb { background:rgba(201,146,42,.25); }
+.dp-close { position:absolute; top:10px; right:10px; background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px 6px; border-radius:3px; }
+.dp-close:hover { color:var(--rust); }
+.dp-day { font-family:'Bebas Neue',sans-serif; font-size:20px; line-height:1; }
+.dp-date { font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:6px; }
+.dp-route { font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.4; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.dp-stats { display:flex; gap:14px; margin-bottom:10px; }
+.dp-stat .n { font-family:'Bebas Neue',sans-serif; font-size:18px; line-height:1; }
+.dp-stat .l { font-size:7px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+.dp-stops-title { font-size:8px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink); margin-bottom:6px; font-weight:700; }
+.dp-stop { display:flex; align-items:flex-start; gap:7px; padding:5px 0; border-bottom:1px solid var(--border); }
+.dp-stop:last-child { border-bottom:none; }
+.dp-stop-emoji { font-size:13px; flex-shrink:0; margin-top:1px; }
+.dp-stop-info { flex:1; min-width:0; }
+.dp-stop-name { font-size:11px; font-weight:600; line-height:1.3; color:var(--ink); }
+.dp-stop-time { font-size:9px; color:var(--gold); }
+.dp-stop-type { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+
+/* DAY NAV */
+.day-nav { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(245,240,232,0.97); border:1px solid rgba(201,146,42,.4); border-radius:6px; padding:8px 16px; display:none; align-items:center; gap:14px; box-shadow:0 4px 16px rgba(26,20,16,.18); z-index:5; max-width:92%; color:var(--ink); }
+.day-nav.show { display:flex; }
+.nav-arrow { background:white; border:1px solid var(--border); color:var(--ink); width:28px; height:28px; border-radius:3px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0; }
+.nav-arrow:hover:not(:disabled) { border-color:var(--gold); color:var(--gold); }
+.nav-arrow:disabled { opacity:.3; cursor:not-allowed; }
+.nav-center { text-align:center; min-width:0; }
+.nav-day { font-family:'Bebas Neue',sans-serif; font-size:18px; line-height:1; }
+.nav-route { font-size:9px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }
+.nav-miles { font-size:9px; color:var(--gold); white-space:nowrap; }
+.nav-emojis { display:flex; gap:3px; flex-wrap:wrap; max-width:160px; flex-shrink:0; }
+
+/* ANALYTICS */
+.analytics { position:absolute; top:12px; left:50%; transform:translateX(-50%); background:rgba(245,240,232,0.98); border:1px solid rgba(201,146,42,.35); border-radius:8px; padding:14px 18px; z-index:6; min-width:460px; box-shadow:0 4px 20px rgba(26,20,16,.18); display:none; color:var(--ink); }
+.analytics.show { display:block; }
+.an-title { font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--ink); letter-spacing:.06em; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.an-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:12px; }
+.an-cell { background:white; border:1px solid var(--border); border-radius:4px; padding:7px 4px; text-align:center; }
+.an-cell .n { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--gold); line-height:1; }
+.an-cell .l { font-size:8px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-top:2px; }
+.an-bars-label { font-size:8px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink); font-weight:700; margin-bottom:7px; }
+.an-bars { display:flex; align-items:flex-end; gap:3px; height:52px; }
+.an-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; }
+.an-bar-n { font-size:7px; font-weight:700; line-height:1; }
+.an-bar-col { width:100%; border-radius:2px 2px 0 0; min-height:3px; }
+.an-bar-d { font-size:7px; }
+.close-btn { background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:15px; padding:0; }
+.close-btn:hover { color:var(--rust); }
+
+/* LAYER TOGGLES */
+.layer-toggle { position:absolute; top:12px; left:12px; z-index:5; display:flex; flex-direction:column; gap:4px; }
+.ltbtn { background:rgba(245,240,232,0.96); border:1px solid var(--border); color:var(--muted); padding:5px 10px; border-radius:3px; font-size:9px; font-family:'DM Sans',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.07em; cursor:pointer; transition:all .15s; white-space:nowrap; box-shadow:0 1px 4px rgba(26,20,16,.1); }
+.ltbtn:hover { border-color:var(--gold); color:var(--gold); }
+.ltbtn.on { background:rgba(201,146,42,.1); border-color:rgba(201,146,42,.5); color:var(--gold); }
+
+/* LEGEND */
+.legend { position:absolute; bottom:20px; right:12px; background:rgba(245,240,232,0.97); border:1px solid var(--border); border-radius:5px; padding:8px 10px; box-shadow:0 2px 8px rgba(26,20,16,.1); }
+.legend-title { font-size:7px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink); font-weight:700; margin-bottom:4px; }
+.legend-item { display:flex; align-items:center; gap:5px; cursor:pointer; margin-bottom:2px; }
+.legend-line { width:18px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-label { font-size:8px; color:var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="tab-nav">
+  <div class="trip-id">2026 CA Road Trip</div>
+  <a href="2026_CA_Roadtrip_Dashboard.html">📋 Trip Dashboard</a>
+  <a href="2026_CA_Roadtrip_Map.html" class="active">🗺 Interactive Map</a>
+  <a href="2026_CA_Roadtrip_Checklist.html">✅ Pre-Departure Checklist</a>
+</nav>
+<header>
+  <div>
+    <div class="trip-title">2026 CA Road Trip &mdash; Interactive Map</div>
+    <div class="hdr-sub">Jun 11&ndash;22 &middot; 12 Days &middot; 7 Travelers &middot; Ford Transit</div>
+  </div>
+  <div class="hdr-btns">
+    <button class="hbtn active" id="btnAll" onclick="showAll()">Full Trip</button>
+    <button class="hbtn" id="btnAnalytics" onclick="toggleAnalytics()">Analytics</button>
+    <button class="hbtn active" id="btnLabels" onclick="toggleLabels()">Labels On</button>
+    <button class="hbtn" onclick="fitAll()">Fit All</button>
+  </div>
+</header>
+
+<div class="stat-strip">
+  <div class="s"><span class="sn">~1,850</span><span class="sl">Est. Miles</span></div>
+  <div class="s"><span class="sn">12</span><span class="sl">Days</span></div>
+  <div class="s"><span class="sn">9</span><span class="sl">Hotels</span></div>
+  <div class="s"><span class="sn">2</span><span class="sl">Nat'l Parks</span></div>
+  <div class="s"><span class="sn">3</span><span class="sl">Six Flags</span></div>
+  <div class="s"><span class="sn" id="statStops">0</span><span class="sl">Total Stops</span></div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sb-hdr">
+      <div class="sb-label">Select Day</div>
+      <div class="sb-all active" id="sbAll" onclick="showAll()">All 12 Days</div>
+    </div>
+    <div class="day-list" id="dayList"></div>
+  </div>
+
+  <div id="map">
+    <div class="layer-toggle">
+      <button class="ltbtn on" id="ltRoutes" onclick="toggleLayer('routes')">Routes</button>
+      <button class="ltbtn on" id="ltStops" onclick="toggleLayer('stops')">Stops</button>
+      <button class="ltbtn on" id="ltGas" onclick="toggleLayer('gas')">Gas Stops</button>
+      <button class="ltbtn on" id="ltHotels" onclick="toggleLayer('hotels')">Hotels</button>
+    </div>
+
+    <div class="detail-panel" id="detailPanel">
+      <button class="dp-close" onclick="closeDetail()">x</button>
+      <div id="dpContent"></div>
+    </div>
+
+    <div class="day-nav" id="dayNav">
+      <button class="nav-arrow" id="navPrev" onclick="stepDay(-1)">&#9664;</button>
+      <div class="nav-center">
+        <div class="nav-day" id="navDay"></div>
+        <div class="nav-route" id="navRoute"></div>
+        <div class="nav-miles" id="navMiles"></div>
+      </div>
+      <div class="nav-emojis" id="navEmojis"></div>
+      <button class="nav-arrow" id="navNext" onclick="stepDay(1)">&#9654;</button>
+    </div>
+
+    <div class="analytics" id="analyticsPanel">
+      <div class="an-title">
+        Trip Analytics
+        <button class="close-btn" onclick="toggleAnalytics()">x</button>
+      </div>
+      <div class="an-grid" id="anGrid"></div>
+      <div class="an-bars-label">Miles per day &mdash; click to isolate</div>
+      <div class="an-bars" id="anBars"></div>
+    </div>
+
+    <div class="legend" id="legend">
+      <div class="legend-title">Route Colors</div>
+      <div id="legendItems"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2FtaWNsZWEiLCJhIjoiY21wejNnY3ZsMGRlMTJycHNmZmozZW91bCJ9.z9jPxSOinAa6Wfc4L_Ofng';
+
+const DAY_COLORS = ['#c9922a','#3d7a52','#2d6a8f','#b5451b','#7a52a0','#c47a2a','#2a8a7a','#a03070','#2a508a','#8a9a2a','#2a7a50','#a04a2a'];
+
+const DAYS = [
+  {num:1,date:'Thu Jun 11',route:'Irvine to Santa Barbara to Solvang to Paso Robles',miles:280,stops:[
+    {n:'Irvine (Home)',lat:33.6846,lng:-117.8265,t:'depart',time:'7:00am',e:'H'},
+    {n:'Santa Barbara Mission',lat:34.4384,lng:-119.7111,t:'attraction',time:'9:30am',e:'A'},
+    {n:'Stearns Wharf',lat:34.4084,lng:-119.6871,t:'stop',time:'11:15am',e:'W'},
+    {n:'Ostrichland USA',lat:34.5915,lng:-120.1357,t:'roadside',time:'12:15pm',e:'R'},
+    {n:'Solvang',lat:34.5958,lng:-120.1376,t:'stop',time:'12:30pm',e:'S'},
+    {n:'Pismo Beach',lat:35.1428,lng:-120.6413,t:'stop',time:'2:15pm',e:'B'},
+    {n:'Madonna Inn SLO',lat:35.2764,lng:-120.671,t:'stop',time:'3:00pm',e:'S'},
+    {n:'HIEx Paso Robles',lat:35.6312,lng:-120.6941,t:'hotel',time:'5:00pm',e:'H',o:true},
+  ]},
+  {num:2,date:'Fri Jun 12',route:'Paso Robles to Monterey',miles:115,stops:[
+    {n:'Paso Robles',lat:35.6312,lng:-120.6941,t:'depart',time:'8:00am',e:'G'},
+    {n:'Costco Gas Salinas',lat:36.6918,lng:-121.6475,t:'gas',time:'en route',e:'G'},
+    {n:'Monterey Bay Aquarium',lat:36.6185,lng:-121.9018,t:'attraction',time:'9:00am',e:'A'},
+    {n:'Cannery Row',lat:36.6175,lng:-121.9011,t:'stop',time:'1:00pm',e:'S'},
+    {n:'17-Mile Drive',lat:36.5768,lng:-121.9488,t:'stop',time:'2:30pm',e:'D'},
+    {n:'Travelodge Monterey Bay',lat:36.6002,lng:-121.8947,t:'hotel',time:'4:30pm',e:'H',o:true},
+  ]},
+  {num:3,date:'Sat Jun 13',route:'Monterey to Santa Cruz to Watsonville',miles:65,stops:[
+    {n:'Monterey',lat:36.6002,lng:-121.8947,t:'depart',time:'9:00am',e:'G'},
+    {n:'Dennis the Menace Park',lat:36.5952,lng:-121.8842,t:'stop',time:'9:30am',e:'P'},
+    {n:'Giant Artichoke Castroville',lat:36.7654,lng:-121.7527,t:'roadside',time:'10:15am',e:'R'},
+    {n:'Mystery Spot 12:12pm',lat:37.0149,lng:-122.0505,t:'attraction',time:'12:12pm',e:'A'},
+    {n:'Santa Cruz Boardwalk',lat:36.9641,lng:-122.0179,t:'attraction',time:'2:00pm',e:'A'},
+    {n:'Natural Bridges Beach',lat:36.9511,lng:-122.0586,t:'stop',time:'5:30pm',e:'B'},
+    {n:'Hampton Inn Watsonville',lat:36.9139,lng:-121.7695,t:'hotel',time:'7:30pm',e:'H',o:true},
+  ]},
+  {num:4,date:'Sun Jun 14',route:'Watsonville to Gilroy to Great America to Walnut Creek',miles:135,stops:[
+    {n:'Watsonville',lat:36.9139,lng:-121.7695,t:'depart',time:'8:30am',e:'G'},
+    {n:'Garlic World Gilroy',lat:36.9966,lng:-121.5705,t:'stop',time:'9:00am',e:'S'},
+    {n:'Costco Gas Gilroy',lat:37.0021,lng:-121.5641,t:'gas',time:'9:00am',e:'G'},
+    {n:'Six Flags Great America',lat:37.3975,lng:-121.9748,t:'attraction',time:'9:30am',e:'A'},
+    {n:'Bosco Dog Mayor Sunol',lat:37.5972,lng:-121.8791,t:'roadside',time:'5:00pm',e:'R'},
+    {n:'HIEx Walnut Creek',lat:37.9069,lng:-122.0619,t:'hotel',time:'6:15pm',e:'H',o:true},
+  ]},
+  {num:5,date:'Mon Jun 15',route:'Walnut Creek to San Francisco Day Trip',miles:90,stops:[
+    {n:'Walnut Creek',lat:37.9069,lng:-122.0619,t:'depart',time:'7:15am',e:'G'},
+    {n:'452 Beach St Parking',lat:37.8065,lng:-122.4155,t:'stop',time:'8:00am',e:'P'},
+    {n:'Alcatraz Island',lat:37.827,lng:-122.423,t:'attraction',time:'9:20am',e:'A'},
+    {n:'Pier 39 Boudin Bakery',lat:37.8087,lng:-122.4098,t:'food',time:'12:30pm',e:'F'},
+    {n:'Nintendo SF',lat:37.7863,lng:-122.4075,t:'stop',time:'1:45pm',e:'S'},
+    {n:'Lombard Street',lat:37.8021,lng:-122.4186,t:'stop',time:'3:00pm',e:'S'},
+    {n:'Ghirardelli Square',lat:37.8057,lng:-122.4227,t:'stop',time:'3:45pm',e:'F'},
+    {n:'Golden Gate Bridge',lat:37.8199,lng:-122.4783,t:'attraction',time:'4:30pm',e:'A'},
+    {n:'Marin Vista Point',lat:37.8324,lng:-122.4849,t:'stop',time:'4:45pm',e:'S'},
+    {n:'HIEx Walnut Creek Night 2',lat:37.9069,lng:-122.0619,t:'hotel',time:'6:00pm',e:'H',o:true},
+  ]},
+  {num:6,date:'Tue Jun 16',route:'Walnut Creek to Discovery Kingdom to Garberville',miles:210,stops:[
+    {n:'Walnut Creek',lat:37.9069,lng:-122.0619,t:'depart',time:'8:00am',e:'G'},
+    {n:'Jelly Belly Factory',lat:38.2494,lng:-122.0402,t:'stop',time:'9:00am',e:'S'},
+    {n:'Six Flags Discovery Kingdom',lat:38.1312,lng:-122.2294,t:'attraction',time:'10:30am',e:'A'},
+    {n:'BW Plus Garberville',lat:40.0994,lng:-123.7989,t:'hotel',time:'7:30pm',e:'H',o:true},
+  ]},
+  {num:7,date:'Wed Jun 17',route:'Garberville to Ave of Giants to Eureka to Hwy 299 to Redding',miles:205,stops:[
+    {n:'Garberville',lat:40.0994,lng:-123.7989,t:'depart',time:'9:00am',e:'G'},
+    {n:'Avenue of the Giants',lat:40.3479,lng:-123.9212,t:'attraction',time:'9:30am',e:'A'},
+    {n:'Shrine Drive-Thru Tree',lat:40.2724,lng:-123.9055,t:'roadside',time:'10:00am',e:'R'},
+    {n:'Confusion Hill Piercy',lat:39.9787,lng:-123.798,t:'roadside',time:'10:30am',e:'R'},
+    {n:'Costco Gas Eureka',lat:40.8021,lng:-124.1637,t:'gas',time:'11:30am',e:'G'},
+    {n:'Eureka Lunch',lat:40.8021,lng:-124.15,t:'food',time:'12:00pm',e:'F'},
+    {n:'Hwy 299 Trinity Canyon',lat:40.576,lng:-123.385,t:'stop',time:'en route',e:'S'},
+    {n:'Fairfield Marriott Redding',lat:40.5652,lng:-122.3928,t:'hotel',time:'3:30pm',e:'H',o:true},
+  ]},
+  {num:8,date:'Thu Jun 18',route:'Redding to Burney Falls to Subway Cave to Lassen to Auburn',miles:220,stops:[
+    {n:'Redding',lat:40.5652,lng:-122.3928,t:'depart',time:'7:00am',e:'G'},
+    {n:'Costco Gas Redding',lat:40.5687,lng:-122.3476,t:'gas',time:'7:00am',e:'G'},
+    {n:'McArthur-Burney Falls',lat:41.0118,lng:-121.6533,t:'attraction',time:'8:00am',e:'A'},
+    {n:'Stand By Me Bridge',lat:41.0083,lng:-121.9292,t:'roadside',time:'9:15am',e:'R'},
+    {n:'Subway Cave Lava Tubes',lat:40.6491,lng:-121.4461,t:'attraction',time:'9:30am',e:'A'},
+    {n:'Lassen Volcanic NP',lat:40.4382,lng:-121.5114,t:'attraction',time:'11:00am',e:'A'},
+    {n:'BW Golden Key Auburn',lat:38.8966,lng:-121.0782,t:'hotel',time:'5:30pm',e:'H',o:true},
+  ]},
+  {num:9,date:'Fri Jun 19',route:'Auburn to Coloma to Placerville to Columbia to Groveland',miles:185,stops:[
+    {n:'Auburn',lat:38.8966,lng:-121.0782,t:'depart',time:'7:30am',e:'G'},
+    {n:'Costco Gas Roseville',lat:38.7591,lng:-121.2883,t:'gas',time:'8:15am',e:'G'},
+    {n:'Ken Fox Statues Auburn',lat:38.8945,lng:-121.0761,t:'roadside',time:'Morning',e:'R'},
+    {n:'Marshall Gold Coloma',lat:38.7974,lng:-120.8871,t:'attraction',time:'9:15am',e:'A'},
+    {n:'Placerville',lat:38.7296,lng:-120.7985,t:'stop',time:'11:05am',e:'S'},
+    {n:'Columbia State Park',lat:38.0347,lng:-120.4046,t:'attraction',time:'1:50pm',e:'A'},
+    {n:'Sonora Grocery',lat:37.9835,lng:-120.3827,t:'stop',time:'3:50pm',e:'S'},
+    {n:'Big Creek Hideaway Groveland',lat:37.8413,lng:-120.1578,t:'hotel',time:'5:00pm',e:'H',o:true},
+  ]},
+  {num:10,date:'Sat Jun 20',route:'Groveland to Yosemite Valley to Groveland',miles:95,stops:[
+    {n:'Groveland',lat:37.8413,lng:-120.1578,t:'depart',time:'8:00am',e:'G'},
+    {n:'Tunnel View Yosemite',lat:37.7157,lng:-119.6789,t:'attraction',time:'8:45am',e:'A'},
+    {n:'Bridalveil Fall',lat:37.716,lng:-119.6502,t:'stop',time:'9:00am',e:'S'},
+    {n:'El Capitan Meadow',lat:37.7339,lng:-119.6371,t:'stop',time:'9:30am',e:'S'},
+    {n:'Vernal Fall Mist Trail',lat:37.7325,lng:-119.5575,t:'attraction',time:'10:00am',e:'A'},
+    {n:'Yosemite Village',lat:37.749,lng:-119.5884,t:'food',time:'1:00pm',e:'F'},
+    {n:'Ahwahnee Hotel',lat:37.7469,lng:-119.573,t:'stop',time:'2:00pm',e:'S'},
+    {n:'Big Creek Hideaway Night 2',lat:37.8413,lng:-120.1578,t:'hotel',time:'4:00pm',e:'H',o:true},
+  ]},
+  {num:11,date:'Sun Jun 21',route:'Groveland to Tuolumne to Mono Lake to Mammoth to 395 to Valencia',miles:310,stops:[
+    {n:'Groveland',lat:37.8413,lng:-120.1578,t:'depart',time:'7:30am',e:'G'},
+    {n:'Tuolumne Meadows',lat:37.8734,lng:-119.3565,t:'attraction',time:'9:45am',e:'A'},
+    {n:'Olmsted Point',lat:37.8316,lng:-119.4897,t:'stop',time:'11:30am',e:'S'},
+    {n:'Mono Lake',lat:37.9755,lng:-119.0233,t:'attraction',time:'12:45pm',e:'A'},
+    {n:'Lee Vining Gas',lat:37.958,lng:-119.1218,t:'gas',time:'1:00pm',e:'G'},
+    {n:'Mammoth Lakes Birthday',lat:37.6485,lng:-118.9721,t:'attraction',time:'2:15pm',e:'A'},
+    {n:'Devils Postpile',lat:37.6261,lng:-119.0851,t:'attraction',time:'2:30pm',e:'A'},
+    {n:'Gojira Ramen Birthday Dinner',lat:37.6501,lng:-118.974,t:'food',time:'5:00pm',e:'F'},
+    {n:'Alabama Hills Lone Pine',lat:36.5961,lng:-118.1154,t:'roadside',time:'8:00pm',e:'R'},
+    {n:'Embassy Suites Valencia',lat:34.4481,lng:-118.5746,t:'hotel',time:'9:30pm',e:'H',o:true},
+  ]},
+  {num:12,date:'Mon Jun 22',route:'Valencia to Six Flags Magic Mountain to Irvine',miles:80,stops:[
+    {n:'Embassy Suites Valencia',lat:34.4481,lng:-118.5746,t:'depart',time:'Morning',e:'G'},
+    {n:'Costco Gas Santa Clarita',lat:34.3916,lng:-118.5426,t:'gas',time:'9:30am',e:'G'},
+    {n:'Six Flags Magic Mountain',lat:34.4254,lng:-118.5979,t:'attraction',time:'10:00am',e:'A'},
+    {n:'Irvine Home',lat:33.6846,lng:-117.8265,t:'arrive',time:'Evening',e:'H'},
+  ]},
+];
+
+const TOTAL_MI = DAYS.reduce((s,d)=>s+d.miles,0);
+const MAX_MI = Math.max(...DAYS.map(d=>d.miles));
+const TOTAL_STOPS = DAYS.reduce((s,d)=>s+d.stops.length,0);
+
+let map, activeDay = null, markers = [], routeLayers = [], routeCache = {};
+let showLabels = true, layers = {routes:true,stops:true,gas:true,hotels:true};
+
+// INIT
+function initMap() {
+  map = new mapboxgl.Map({
+    container:'map',
+    style:'mapbox://styles/mapbox/outdoors-v12',
+    center:[-120.5, 37.5],
+    zoom:5.8,
+    attributionControl:false
+  });
+  map.addControl(new mapboxgl.NavigationControl({showCompass:true}), 'bottom-right');
+  map.addControl(new mapboxgl.AttributionControl({compact:true}), 'bottom-right');
+  map.on('load', () => {
+    buildSidebar();
+    buildAnalytics();
+    buildLegend();
+    document.getElementById('statStops').textContent = TOTAL_STOPS;
+    renderAll();
+  });
+}
+
+// ROUTING
+async function getRoute(stops) {
+  const valid = stops.filter(s => s.t !== 'gas');
+  if (valid.length < 2) return null;
+  const coords = valid.map(s => s.lng + ',' + s.lat).join(';');
+  if (routeCache[coords]) return routeCache[coords];
+  try {
+    const url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + coords + '?geometries=geojson&overview=full&access_token=' + mapboxgl.accessToken;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.routes && data.routes[0]) {
+      routeCache[coords] = data.routes[0].geometry;
+      return data.routes[0].geometry;
+    }
+  } catch(e) { console.warn('Routing failed', e); }
+  return null;
+}
+
+// CLEAR
+function clearMap() {
+  markers.forEach(m => m.remove());
+  markers = [];
+  routeLayers.forEach(id => {
+    try { if (map.getLayer(id)) map.removeLayer(id); } catch(e) {}
+    try { if (map.getSource(id)) map.removeSource(id); } catch(e) {}
+  });
+  routeLayers = [];
+}
+
+// ADD ROUTE
+async function addRoute(day, dim) {
+  const color = DAY_COLORS[(day.num-1)%12];
+  const valid = day.stops.filter(s => s.t !== 'gas');
+  if (valid.length < 2) return;
+  const geom = await getRoute(day.stops) || {
+    type:'LineString',
+    coordinates: valid.map(s => [s.lng, s.lat])
+  };
+  const sid = 'route-' + day.num;
+  const gid = 'glow-' + day.num;
+  const lid = 'line-' + day.num;
+  [gid, lid].forEach(id => { try { if(map.getLayer(id)) map.removeLayer(id); } catch(e){} });
+  try { if(map.getSource(sid)) map.removeSource(sid); } catch(e) {}
+  map.addSource(sid, {type:'geojson', data:{type:'Feature', geometry:geom}});
+  map.addLayer({id:gid, type:'line', source:sid, paint:{
+    'line-color':color,
+    'line-width': dim ? 5 : (activeDay ? 16 : 9),
+    'line-opacity': dim ? 0.06 : (activeDay ? 0.2 : 0.14),
+    'line-blur':4
+  }});
+  map.addLayer({id:lid, type:'line', source:sid,
+    layout:{'line-cap':'round','line-join':'round'},
+    paint:{
+      'line-color':color,
+      'line-width': dim ? 1.5 : (activeDay ? 5 : 2.5),
+      'line-opacity': dim ? 0.28 : 0.92,
+      'line-dasharray': dim ? ['literal',[4,3]] : ['literal',[1]]
+    }
+  });
+  routeLayers.push(sid, gid, lid);
+}
+
+// ADD MARKERS
+function addMarkers(day, dimOthers) {
+  const color = DAY_COLORS[(day.num-1)%12];
+  day.stops.forEach(stop => {
+    if (stop.t === 'gas' && !layers.gas) return;
+    if (stop.t === 'hotel' && !layers.hotels) return;
+    if (!layers.stops && stop.t !== 'gas' && stop.t !== 'hotel') return;
+
+    const isON = !!stop.o;
+    const isGas = stop.t === 'gas';
+    const sz = isON ? (activeDay?36:26) : (isGas?16:(activeDay?26:18));
+
+    // Marker element — exact size, overflow hidden, no children
+    const el = document.createElement('div');
+    el.style.width = sz + 'px';
+    el.style.height = sz + 'px';
+    el.style.borderRadius = '50%';
+    el.style.background = isON ? 'rgba(245,240,232,0.95)' : color;
+    el.style.border = (isON ? '2.5px' : '1.5px') + ' solid ' + (isON ? color : 'rgba(255,255,255,0.8)');
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontSize = Math.round(sz * 0.46) + 'px';
+    el.style.opacity = dimOthers ? '0.4' : '1';
+    el.style.cursor = 'pointer';
+    el.style.boxSizing = 'border-box';
+    el.style.overflow = 'hidden';
+    el.style.boxShadow = isON ? ('0 2px 10px ' + color + '66') : '0 1px 6px rgba(0,0,0,0.3)';
+    el.style.fontFamily = 'sans-serif';
+    el.style.lineHeight = '1';
+
+    // Type indicator letter instead of emoji to avoid sizing issues
+    const typeMap = {depart:'D',arrive:'H',hotel:'H',attraction:'*',stop:'.',food:'F',roadside:'!',gas:'G'};
+    el.style.color = isON ? color : 'white';
+    el.style.fontWeight = '700';
+    el.style.fontSize = Math.round(sz * 0.38) + 'px';
+    el.style.letterSpacing = '0';
+    el.textContent = isGas ? 'G' : (isON ? 'H' : (stop.t === 'attraction' ? 'A' : (stop.t === 'food' ? 'F' : '.')));
+
+    el.addEventListener('click', () => { if (activeDay !== day.num) selectDay(day.num); });
+
+    // Popup using setPopup — Mapbox handles positioning
+    const popup = new mapboxgl.Popup({
+      offset: Math.round(sz/2) + 8,
+      closeButton: false,
+      closeOnClick: false,
+      maxWidth: '240px',
+      anchor: 'bottom'
+    });
+    popup.setHTML(
+      '<div class="pu-day">Day ' + day.num + ' - ' + day.date + '</div>' +
+      '<div class="pu-name">' + stop.n + '</div>' +
+      '<div class="pu-type">' + stop.t + (isON ? ' - Overnight' : '') + '</div>' +
+      '<div class="pu-time">' + stop.time + '</div>'
+    );
+
+    const marker = new mapboxgl.Marker({element:el, anchor:'center'})
+      .setLngLat([stop.lng, stop.lat])
+      .setPopup(popup)
+      .addTo(map);
+    markers.push(marker);
+
+    // Show popup on hover — use marker's built-in toggle
+    el.addEventListener('mouseenter', () => { if (!marker.getPopup().isOpen()) marker.togglePopup(); });
+    el.addEventListener('mouseleave', () => { if (marker.getPopup().isOpen()) marker.togglePopup(); });
+
+    // Glow rings for overnight — separate markers, zero pointer events
+    if (isON && !dimOthers) {
+      [sz+10, sz+20].forEach((rs, ri) => {
+        const ring = document.createElement('div');
+        ring.style.width = rs + 'px';
+        ring.style.height = rs + 'px';
+        ring.style.borderRadius = '50%';
+        ring.style.border = (1.5 - ri*0.4) + 'px solid ' + color;
+        ring.style.opacity = (0.3 - ri*0.1) + '';
+        ring.style.pointerEvents = 'none';
+        ring.style.boxSizing = 'border-box';
+        const rm = new mapboxgl.Marker({element:ring, anchor:'center'})
+          .setLngLat([stop.lng, stop.lat]).addTo(map);
+        markers.push(rm);
+      });
+    }
+
+    // Label — separate marker
+    const wantLabel = showLabels && (isON || (activeDay && (stop.t==='attraction'||stop.t==='food'||stop.t==='hotel')));
+    if (wantLabel) {
+      const lbl = document.createElement('div');
+      lbl.className = 'map-label';
+      lbl.style.background = 'rgba(245,240,232,0.94)';
+      lbl.style.color = color;
+      lbl.style.fontFamily = "'DM Sans',sans-serif";
+      lbl.style.fontWeight = '700';
+      lbl.style.fontSize = (activeDay ? 10 : 9) + 'px';
+      lbl.style.padding = '2px 7px';
+      lbl.style.borderRadius = '3px';
+      lbl.style.whiteSpace = 'nowrap';
+      lbl.style.border = '1px solid ' + color + '55';
+      lbl.style.pointerEvents = 'none';
+      lbl.style.lineHeight = '1.4';
+      lbl.style.boxShadow = '0 1px 4px rgba(26,20,16,0.12)';
+      lbl.textContent = activeDay ? stop.n : ('D' + day.num);
+      const lm = new mapboxgl.Marker({element:lbl, anchor:'bottom', offset:[0,-(Math.round(sz/2)+6)]})
+        .setLngLat([stop.lng, stop.lat]).addTo(map);
+      markers.push(lm);
+    }
+  });
+}
+
+// RENDER ALL
+async function renderAll() {
+  clearMap();
+  activeDay = null;
+  document.getElementById('dayNav').classList.remove('show');
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('legend').style.display = 'block';
+  for (const day of DAYS) {
+    await addRoute(day, false);
+    addMarkers(day, false);
+  }
+  updateSidebar();
+}
+
+// SELECT DAY
+async function selectDay(dayNum) {
+  activeDay = dayNum;
+  clearMap();
+  const day = DAYS.find(d => d.num === dayNum);
+  const color = DAY_COLORS[(dayNum-1)%12];
+  for (const d of DAYS) {
+    if (d.num !== dayNum) await addRoute(d, true);
+  }
+  await addRoute(day, false);
+  addMarkers(day, false);
+  fitDay(day);
+  updateDayNav(day, color);
+  updateDetailPanel(day, color);
+  updateSidebar();
+  document.getElementById('legend').style.display = 'none';
+  document.getElementById('btnAll').classList.remove('active');
+}
+
+// FIT BOUNDS
+function fitDay(day) {
+  const bounds = new mapboxgl.LngLatBounds();
+  day.stops.forEach(s => bounds.extend([s.lng, s.lat]));
+  map.fitBounds(bounds, {padding:{top:80,bottom:110,left:60,right:300}, maxZoom:12, duration:800});
+}
+function fitAll() {
+  const bounds = new mapboxgl.LngLatBounds();
+  DAYS.forEach(d => d.stops.forEach(s => bounds.extend([s.lng, s.lat])));
+  map.fitBounds(bounds, {padding:60, maxZoom:8, duration:800});
+}
+
+// DAY NAV
+function updateDayNav(day, color) {
+  document.getElementById('dayNav').classList.add('show');
+  document.getElementById('dayNav').style.borderColor = color + '66';
+  document.getElementById('navDay').textContent = 'Day ' + day.num;
+  document.getElementById('navDay').style.color = color;
+  document.getElementById('navRoute').textContent = day.route;
+  document.getElementById('navMiles').textContent = '~' + day.miles + ' miles - ' + day.stops.length + ' stops';
+  document.getElementById('navEmojis').textContent = day.stops.map(s => s.e).join(' ');
+  document.getElementById('navPrev').disabled = day.num === 1;
+  document.getElementById('navNext').disabled = day.num === 12;
+}
+function stepDay(dir) {
+  if (!activeDay) return;
+  const n = activeDay + dir;
+  if (n >= 1 && n <= 12) selectDay(n);
+}
+
+// DETAIL PANEL
+function updateDetailPanel(day, color) {
+  document.getElementById('detailPanel').classList.add('show');
+  document.getElementById('detailPanel').style.borderColor = color + '55';
+  document.getElementById('dpContent').innerHTML =
+    '<div class="dp-day" style="color:' + color + '">Day ' + day.num + '</div>' +
+    '<div class="dp-date">' + day.date + '</div>' +
+    '<div class="dp-route">' + day.route + '</div>' +
+    '<div class="dp-stats">' +
+      '<div class="dp-stat"><div class="n" style="color:' + color + '">~' + day.miles + '</div><div class="l">Miles</div></div>' +
+      '<div class="dp-stat"><div class="n" style="color:' + color + '">' + day.stops.length + '</div><div class="l">Stops</div></div>' +
+      '<div class="dp-stat"><div class="n" style="color:' + color + '">' + day.stops.filter(s=>s.t==='attraction').length + '</div><div class="l">Attractions</div></div>' +
+    '</div>' +
+    '<div class="dp-stops-title">Stop by Stop</div>' +
+    day.stops.map(s =>
+      '<div class="dp-stop">' +
+        '<div class="dp-stop-emoji">' + s.e + '</div>' +
+        '<div class="dp-stop-info">' +
+          '<div class="dp-stop-name">' + s.n + '</div>' +
+          '<div class="dp-stop-time">' + s.time + '</div>' +
+          '<div class="dp-stop-type">' + s.t + (s.o ? ' - overnight' : '') + '</div>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+}
+function closeDetail() { document.getElementById('detailPanel').classList.remove('show'); }
+
+// SHOW ALL
+function showAll() {
+  document.getElementById('btnAll').classList.add('active');
+  renderAll();
+  setTimeout(fitAll, 200);
+}
+
+// SIDEBAR
+function buildSidebar() {
+  document.getElementById('dayList').innerHTML = DAYS.map((day,i) => {
+    const color = DAY_COLORS[i%12];
+    return '<div class="day-item" id="di-' + day.num + '" onclick="selectDay(' + day.num + ')">' +
+      '<div class="di-row">' +
+        '<div class="di-dot" style="background:' + color + '"></div>' +
+        '<div class="di-num" style="color:' + color + '">Day ' + day.num + '</div>' +
+        '<div class="di-mi">~' + day.miles + 'mi</div>' +
+      '</div>' +
+      '<div class="di-date">' + day.date + '</div>' +
+      '<div class="di-route">' + day.route + '</div>' +
+    '</div>';
+  }).join('');
+}
+function updateSidebar() {
+  document.querySelectorAll('.day-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sbAll').classList.toggle('active', activeDay === null);
+  if (activeDay) {
+    var el = document.getElementById('di-' + activeDay);
+    if (el) { el.classList.add('active'); el.scrollIntoView({block:'nearest'}); }
+  }
+}
+
+// ANALYTICS
+function buildAnalytics() {
+  document.getElementById('anGrid').innerHTML = [
+    {n:'~'+TOTAL_MI.toLocaleString(),l:'Total Miles'},
+    {n:Math.round(TOTAL_MI/12),l:'Avg Mi/Day'},
+    {n:MAX_MI,l:'Longest Day'},
+    {n:Math.min.apply(null,DAYS.map(d=>d.miles)),l:'Shortest Day'},
+    {n:TOTAL_STOPS,l:'Total Stops'}
+  ].map(s => '<div class="an-cell"><div class="n">' + s.n + '</div><div class="l">' + s.l + '</div></div>').join('');
+
+  document.getElementById('anBars').innerHTML = DAYS.map(day => {
+    const pct = Math.max(6, Math.round((day.miles/MAX_MI)*100));
+    const color = DAY_COLORS[(day.num-1)%12];
+    return '<div class="an-bar-wrap" onclick="selectDay(' + day.num + ');toggleAnalytics();">' +
+      '<div class="an-bar-n" style="color:' + color + '">' + day.miles + '</div>' +
+      '<div style="width:100%;height:40px;display:flex;align-items:flex-end;">' +
+        '<div class="an-bar-col" style="height:' + pct + '%;background:' + color + '88"></div>' +
+      '</div>' +
+      '<div class="an-bar-d" style="color:' + color + '">' + day.num + '</div>' +
+    '</div>';
+  }).join('');
+}
+function toggleAnalytics() {
+  var panel = document.getElementById('analyticsPanel');
+  panel.classList.toggle('show');
+  document.getElementById('btnAnalytics').classList.toggle('active', panel.classList.contains('show'));
+}
+
+// LEGEND
+function buildLegend() {
+  document.getElementById('legendItems').innerHTML = DAYS.map((day,i) =>
+    '<div class="legend-item" onclick="selectDay(' + day.num + ')">' +
+      '<div class="legend-line" style="background:' + DAY_COLORS[i%12] + '"></div>' +
+      '<div class="legend-label">Day ' + day.num + '</div>' +
+    '</div>'
+  ).join('');
+}
+
+// LAYER TOGGLE
+function toggleLayer(layer) {
+  layers[layer] = !layers[layer];
+  var id = 'lt' + layer.charAt(0).toUpperCase() + layer.slice(1);
+  document.getElementById(id).classList.toggle('on', layers[layer]);
+  activeDay ? selectDay(activeDay) : renderAll();
+}
+
+// LABELS
+function toggleLabels() {
+  showLabels = !showLabels;
+  var btn = document.getElementById('btnLabels');
+  btn.textContent = showLabels ? 'Labels On' : 'Labels Off';
+  btn.classList.toggle('active', showLabels);
+  activeDay ? selectDay(activeDay) : renderAll();
+}
+
+initMap();
+</script>
+</body>
+</html>

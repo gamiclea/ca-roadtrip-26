@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026_CA_Roadtrip — Pre-Departure Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#1a1410;--paper:#f5f0e8;--cream:#ede8dc;--gold:#c9922a;--goldL:#e8b84b;
+  --rust:#b5451b;--sage:#3d7a52;--sky:#2d6a8f;--muted:#8a8070;
+  --border:rgba(26,20,16,0.13);--shadow:rgba(26,20,16,0.08);
+  --green:#2d6a3f;--greenBg:#d4edda;--amber:#856404;--amberBg:#fff3cd;
+  --red:#721c24;--redBg:#f8d7da;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;
+  background-image:radial-gradient(ellipse at 10% 0%,rgba(201,146,42,.07) 0%,transparent 55%),
+  radial-gradient(ellipse at 90% 100%,rgba(45,106,143,.05) 0%,transparent 55%);}
+
+/* ── HEADER ── */
+.tab-nav{background:var(--ink);display:flex;align-items:stretch;gap:0;padding:0 2rem;}
+.tab-nav a{display:flex;align-items:center;gap:.45rem;padding:.6rem 1.2rem;font-family:'DM Sans',sans-serif;
+  font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;
+  color:rgba(245,240,232,.4);border-bottom:3px solid transparent;margin-bottom:0;transition:all .15s;}
+.tab-nav a:hover{color:rgba(245,240,232,.75);}
+.tab-nav a.active{color:var(--goldL);border-bottom-color:var(--gold);}
+.tab-nav .trip-id{font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--goldL);
+  letter-spacing:.06em;margin-right:.75rem;display:flex;align-items:center;padding:.5rem 0;
+  border-right:1px solid rgba(255,255,255,.1);padding-right:1rem;}
+header{background:var(--ink);color:var(--paper);padding:1.6rem 2rem 0;position:relative;overflow:hidden;}
+header::before{content:'READY';position:absolute;right:-20px;top:50%;transform:translateY(-55%);
+  font-family:'Bebas Neue',sans-serif;font-size:8rem;color:rgba(255,255,255,.025);
+  letter-spacing:.04em;pointer-events:none;white-space:nowrap;}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.trip-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,3.6rem);
+  letter-spacing:.05em;line-height:.88;color:var(--paper);}
+.trip-title span{color:var(--goldL);}
+.hdr-meta{text-align:right;font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;
+  color:rgba(245,240,232,.45);line-height:2.1;}
+.hdr-meta strong{color:var(--goldL);display:block;font-size:.9rem;}
+.countdown-strip{display:flex;gap:1px;margin-top:1.4rem;background:rgba(255,255,255,.07);border-top:1px solid rgba(255,255,255,.07);}
+.cd-stat{flex:1;padding:.65rem .75rem;text-align:center;background:rgba(245,240,232,.03);}
+.cd-n{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--goldL);line-height:1;}
+.cd-n.g{color:#6db87a;}.cd-n.a{color:#f0b429;}.cd-n.r{color:#e05c5c;}
+.cd-l{font-size:.55rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,240,232,.4);margin-top:.2rem;}
+
+/* ── LAYOUT ── */
+.container{max-width:1200px;margin:0 auto;padding:1.75rem 1.5rem 5rem;}
+.progress-bar-wrap{background:var(--cream);border-radius:4px;height:8px;margin-bottom:2rem;overflow:hidden;border:1px solid var(--border);}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--goldL));border-radius:4px;transition:width .4s ease;}
+.progress-label{display:flex;justify-content:space-between;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.4rem;}
+
+/* ── SECTION HEADERS ── */
+.sec-label{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:.08em;
+  color:var(--ink);margin:2rem 0 .85rem;padding-bottom:.5rem;
+  border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:.5rem;}
+.sec-label .sec-count{font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--gold);
+  background:rgba(201,146,42,.12);padding:.15rem .45rem;border-radius:3px;margin-left:auto;}
+
+/* ── CHECKLIST ITEMS ── */
+.check-grid{display:flex;flex-direction:column;gap:.45rem;}
+.check-item{display:flex;align-items:flex-start;gap:.75rem;padding:.65rem .85rem;
+  border-radius:5px;border:1.5px solid var(--border);background:white;
+  box-shadow:0 1px 4px var(--shadow);transition:all .18s;cursor:pointer;}
+.check-item:hover{border-color:var(--gold);box-shadow:0 2px 10px rgba(201,146,42,.12);}
+.check-item.done{background:var(--greenBg);border-color:rgba(45,106,63,.25);opacity:.82;}
+.check-item.done .ci-text{text-decoration:line-through;color:var(--muted);}
+.check-item.urgent{border-left:4px solid #e05c5c;background:#fff8f8;}
+.check-item.warn{border-left:4px solid var(--gold);background:#fffdf5;}
+
+.check-box{width:22px;height:22px;border-radius:4px;border:2px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;transition:all .18s;margin-top:.05rem;background:white;}
+.check-item.done .check-box{background:var(--green);border-color:var(--green);color:white;}
+.check-item.urgent .check-box{border-color:#e05c5c;}
+.check-item.warn .check-box{border-color:var(--gold);}
+
+.ci-body{flex:1;min-width:0;}
+.ci-text{font-size:.82rem;line-height:1.45;font-weight:500;color:var(--ink);}
+.ci-sub{font-size:.7rem;color:var(--muted);margin-top:.22rem;line-height:1.5;}
+.ci-sub a{color:var(--sky);text-decoration:none;}
+.ci-sub a:hover{text-decoration:underline;}
+.ci-badge{display:inline-flex;align-items:center;gap:.2rem;font-size:.58rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em;padding:.1rem .4rem;border-radius:2px;
+  margin-left:.4rem;vertical-align:middle;}
+.ci-badge.conf{background:var(--greenBg);color:var(--green);}
+.ci-badge.todo{background:var(--amberBg);color:var(--amber);}
+.ci-badge.urgent{background:var(--redBg);color:var(--red);}
+.ci-conf{font-size:.68rem;font-weight:700;color:var(--green);margin-top:.25rem;
+  font-family:'DM Sans',sans-serif;letter-spacing:.02em;}
+
+/* ── NOTES CARD ── */
+.note-card{background:rgba(201,146,42,.07);border:1px solid rgba(201,146,42,.25);
+  border-radius:5px;padding:.85rem 1rem;font-size:.78rem;line-height:1.7;margin-bottom:.6rem;}
+.note-card strong{color:var(--gold);}
+
+/* ── PACKING GRID ── */
+.pack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.45rem;}
+.pack-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .75rem;
+  border-radius:4px;border:1.5px solid var(--border);background:white;
+  cursor:pointer;transition:all .15s;font-size:.78rem;}
+.pack-item:hover{border-color:var(--gold);}
+.pack-item.done{background:var(--greenBg);border-color:rgba(45,106,63,.25);opacity:.82;}
+.pack-item.done span:last-child{text-decoration:line-through;color:var(--muted);}
+.pack-box{width:18px;height:18px;border-radius:3px;border:1.5px solid var(--border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;background:white;}
+.pack-item.done .pack-box{background:var(--green);border-color:var(--green);color:white;}
+
+/* ── BOOKING SUMMARY TABLE ── */
+.bk-table{width:100%;border-collapse:collapse;font-size:.76rem;}
+.bk-table th{text-align:left;padding:.45rem .75rem;font-size:.6rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--muted);border-bottom:2px solid var(--border);font-weight:700;}
+.bk-table td{padding:.5rem .75rem;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.45;}
+.bk-table tr:last-child td{border-bottom:none;}
+.bk-table tr:hover td{background:rgba(201,146,42,.04);}
+.status-badge{display:inline-flex;align-items:center;gap:.25rem;padding:.12rem .45rem;
+  border-radius:3px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.sb-conf{background:var(--greenBg);color:var(--green);}
+.sb-pend{background:var(--amberBg);color:var(--amber);}
+.sb-miss{background:var(--redBg);color:var(--red);}
+.conf-num{font-size:.68rem;color:var(--muted);margin-top:2px;}
+
+/* ── FOOTER ── */
+.footer-bar{position:fixed;bottom:0;left:0;right:0;background:var(--ink);
+  padding:.65rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;border-top:2px solid var(--gold);z-index:100;flex-wrap:wrap;}
+.footer-stat{text-align:center;}
+.footer-stat .fn{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--goldL);line-height:1;}
+.footer-stat .fl{font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,240,232,.4);}
+.reset-btn{padding:.35rem .8rem;border:1px solid rgba(255,255,255,.2);background:transparent;
+  color:rgba(245,240,232,.5);border-radius:3px;font-size:.62rem;font-family:'DM Sans',sans-serif;
+  font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;transition:all .15s;}
+.reset-btn:hover{border-color:var(--rust);color:var(--rust);}
+
+@media(max-width:640px){
+  .pack-grid{grid-template-columns:1fr 1fr;}
+  .cd-l{font-size:.48rem;}
+  .bk-table{font-size:.7rem;}
+}
+</style>
+</head>
+<body>
+<nav class="tab-nav">
+  <div class="trip-id">2026 CA Road Trip</div>
+  <a href="2026_CA_Roadtrip_Dashboard.html">📋 Trip Dashboard</a>
+  <a href="2026_CA_Roadtrip_Map.html">🗺 Interactive Map</a>
+  <a href="2026_CA_Roadtrip_Checklist.html" class="active">✅ Pre-Departure Checklist</a>
+</nav>
+
+<header>
+  <div class="hdr-top">
+    <div class="trip-title">2026 CA Road Trip<br><span>Pre-Departure Checklist</span></div>
+    <div class="hdr-meta">
+      <strong id="daysOut">7 Days to Go</strong>
+      Jun 11 – 22, 2026<br>
+      7 Travelers · Ford Transit 12-seat<br>
+      ~1,850 miles · 12 Days
+    </div>
+  </div>
+  <div class="countdown-strip">
+    <div class="cd-stat"><div class="cd-n g" id="cntConf">0</div><div class="cd-l">Confirmed</div></div>
+    <div class="cd-stat"><div class="cd-n a" id="cntTodo">0</div><div class="cd-l">To Do</div></div>
+    <div class="cd-stat"><div class="cd-n r" id="cntUrgent">0</div><div class="cd-l">Urgent</div></div>
+    <div class="cd-stat"><div class="cd-n" id="cntTotal">0</div><div class="cd-l">Total Items</div></div>
+    <div class="cd-stat"><div class="cd-n" id="pctDone" style="color:var(--goldL)">0%</div><div class="cd-l">Complete</div></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- PROGRESS -->
+  <div style="margin-bottom:1.5rem;">
+    <div class="progress-label">
+      <span>Overall Readiness</span>
+      <span id="progLabel">0 of 0 items checked</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <!-- ── SECTION 1: URGENT ── -->
+  <div class="sec-label">🚨 Urgent — Do Before You Leave <span class="sec-count" id="sc-urgent"></span></div>
+  <div class="check-grid" id="list-urgent"></div>
+
+  <!-- ── SECTION 2: CONFIRMATIONS NEEDED ── -->
+  <div class="sec-label">📋 Missing Confirmation Numbers <span class="sec-count" id="sc-conf"></span></div>
+  <div class="check-grid" id="list-conf"></div>
+
+  <!-- ── SECTION 3: DAY-OF PREP ── -->
+  <div class="sec-label">📅 Day-Of Logistics <span class="sec-count" id="sc-dayof"></span></div>
+  <div class="check-grid" id="list-dayof"></div>
+
+  <!-- ── SECTION 4: VAN PREP ── -->
+  <div class="sec-label">🚐 Van Prep <span class="sec-count" id="sc-van"></span></div>
+  <div class="check-grid" id="list-van"></div>
+
+  <!-- ── SECTION 5: PACKING ── -->
+  <div class="sec-label">🎒 Packing — Don't Forget <span class="sec-count" id="sc-pack"></span></div>
+  <div class="pack-grid" id="list-pack"></div>
+
+  <!-- ── SECTION 6: BOOKING SUMMARY ── -->
+  <div class="sec-label">🏨 Hotel Booking Summary</div>
+  <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;box-shadow:0 2px 8px var(--shadow);">
+    <table class="bk-table">
+      <thead><tr><th>Night</th><th>Hotel</th><th>Payment</th><th>Status</th><th>Confirmation</th></tr></thead>
+      <tbody id="hotelTable"></tbody>
+    </table>
+  </div>
+
+  <!-- ── SECTION 7: TICKETS & EXCURSIONS ── -->
+  <div class="sec-label">🎟️ Tickets & Excursions</div>
+  <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden;background:white;box-shadow:0 2px 8px var(--shadow);">
+    <table class="bk-table">
+      <thead><tr><th>Day</th><th>Activity</th><th>Details</th><th>Status</th><th>Ref #</th></tr></thead>
+      <tbody id="excTable"></tbody>
+    </table>
+  </div>
+
+  <!-- ── SECTION 8: REMINDERS ── -->
+  <div class="sec-label">💡 Key Reminders & Notes</div>
+  <div id="list-notes"></div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer-bar">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--goldL);letter-spacing:.06em;">
+    2026 CA Road Trip · Pre-Departure
+  </div>
+  <div style="display:flex;gap:1.5rem;">
+    <div class="footer-stat"><div class="fn" id="fConf">0</div><div class="fl">Confirmed</div></div>
+    <div class="footer-stat"><div class="fn" id="fTodo">0</div><div class="fl">To Do</div></div>
+    <div class="footer-stat"><div class="fn" id="fPct">0%</div><div class="fl">Ready</div></div>
+  </div>
+  <button class="reset-btn" onclick="exportChecklist()" style="border-color:rgba(201,146,42,.4);color:var(--goldL);">📤 Export Progress</button>
+  <button class="reset-btn" onclick="importChecklist()" style="border-color:rgba(61,122,82,.4);color:#6db87a;">📥 Import Progress</button>
+  <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
+</div>
+
+<script>
+const KEY = 'ca_rt_2026_checklist';
+
+// ── DATA ──────────────────────────────────────────────────────────────────
+const URGENT = [
+  {id:'u1', text:'Book Mystery Spot Santa Cruz — 12:12pm Jun 13 ✅ BOOKED',
+   sub:'Already booked at 12:12pm, $12/person × 7 = $84. Confirm they have your booking a few days before.',
+   type:'warn', done:true},
+  {id:'u2', text:'Book Devils Postpile Shuttle — Jun 21',
+   sub:'✅ CONFIRMED — Itinerary #423847675. Sun Jun 21. 3 adults × $15 + 4 kids × $7 = $73.',
+   type:'warn', done:true},
+  {id:'u3', text:'Check Lassen Volcanic NP road status',
+   sub:'Visit nps.gov/lavo — determine Plan A (road open: Bumpass Hell hike) vs Plan B (SW + NW entrances only). Historical opening: late June–July. Road likely still closed Jun 18.',
+   type:'warn', done:false},
+  {id:'u4', text:'Verify Yosemite timed entry not required Jun 20 (Sat)',
+   sub:'Confirmed no vehicle reservation needed in 2026 — but double-check nps.gov/yose the week before. Jun 20 is peak Saturday, plan to arrive before 8am.',
+   type:'warn', done:true},
+  {id:'u5', text:'MuniMobile 1-Day Cable Car passes — purchased ✅',
+   sub:'$15/person × 7 = $105. Passes purchased — activate in the MuniMobile app on the morning of Jun 15 before driving to SF. Does NOT cover BART.',
+   type:'warn', done:true},
+  {id:'u6', text:'IHG Platinum Elite activated in Chase app ✅',
+   sub:'Active for HIEx Walnut Creek check-in Jun 14. $250 IHG credit will apply.',
+   type:'warn', done:true},
+  {id:'u7', text:'Big Creek Hideaway — W/D confirmed ✅',
+   sub:'Vacasa property, Conf #BB7H-DVSS. Washer & dryer confirmed on site. Great laundry opportunity on Days 9-10 — 9 days of clothes for 7 people!',
+   type:'warn', done:true},
+  {id:'u8', text:'BW Plus Garberville — hot tub confirmed inoperable ⚠️',
+   sub:'Good to know before arriving — pool still available. Adjust expectations for the group on Day 16.',
+   type:'warn', done:true},
+];
+
+const CONF_NEEDED = [
+  {id:'c1', text:'Travelodge Monterey Bay — Jun 12 ✅ CONFIRMED', sub:'Room 1: 84852EE096375 | Room 2: 84852EE096376. $254/room × 2 = $508.', type:'warn', done:true},
+  {id:'c2', text:'Hampton Inn Watsonville — Jun 13 ✅ CONFIRMED', sub:'Room 1: 81813327 | Room 2: 86529551. $289.44/room × 2 = $578.88.', type:'warn', done:true},
+  {id:'c3', text:'HIEx Walnut Creek — Jun 14-15 ✅ CONFIRMED', sub:'Room 1: 86669052 | Room 2: 27109835. IHG property. $181.16/room × 2 rooms × 2 nights. Activate IHG Platinum Elite in Chase app!', type:'warn', done:true},
+  {id:'c4', text:'BW Plus Humboldt Garberville — Jun 16 ✅ CONFIRMED', sub:'Confirmation #152312644. Single suite 3 queens. $286.73. ⚠️ Still call to confirm hot tub is operational.', type:'warn', done:true},
+  {id:'c5', text:'Big Creek Hideaway Groveland — Jun 19-20 ✅ CONFIRMED', sub:'Vacasa property — Conf #BB7H-DVSS. $877.13 total. W/D confirmed ✅. Heated pool, BBQ, full kitchen.', type:'warn', done:true},
+];
+
+const DAYOF = [
+  {id:'d1', text:'Day 5 SF: Activate MuniMobile passes morning of Jun 15', sub:'Passes already purchased ✅ — just open MuniMobile app and activate all 7 passes at breakfast before driving to SF.', type:'warn', done:false},
+  {id:'d2', text:'Day 5 SF: SpotHero parking at 452 Beach St confirmed', sub:'✅ Rental ID 123392193. Plate 8SQJ853. Enter after 8am, exit before 8pm. 2 blocks from Pier 33.', type:'warn', done:true},
+  {id:'d3', text:'Day 5 SF: Arrive Pier 33 by 8:50am for 9:20am Alcatraz', sub:'✅ Order #76191774. 7 people, $335.65. Park first at 452 Beach St, then walk to Pier 33.', type:'warn', done:true},
+  {id:'d4', text:'Day 8: Decide Lassen Plan A or B based on road status', sub:'Check nps.gov/lavo Jun 4-8. Plan A = full drive-through + Bumpass Hell. Plan B = SW + NW entrances only. Brief the family before Day 8.', type:'warn', done:false},
+  {id:'d5', text:'Day 9: Fill up completely at Costco Roseville before Groveland', sub:'Last Costco gas for ~280 miles. 6750 Stanford Ranch Rd, Roseville. Also last major grocery stop — stock up for 2 nights at Big Creek Hideaway.', type:'warn', done:false},
+  {id:'d11', text:'Day 11: No Costco gas from Groveland to Valencia — fill in Lee Vining or Mammoth', sub:'Last Costco was Roseville (Day 9). Fill up at Lee Vining Shell before dropping into Mammoth. Expect premium prices.', type:'warn', done:false},
+];
+
+const VAN = [
+  {id:'v1', text:'Full tank at Costco Irvine before departure', sub:'115 Technology Dr, Irvine. Opens 5:30am. Fill the van completely.', done:false},
+  {id:'v2', text:'Check tire pressure', sub:'12-seat Ford Transit loaded with 7 people + 9 days luggage. Check all tires including spare.', done:false},
+  {id:'v3', text:'Download offline Google Maps for all route segments', sub:'Priority areas: Humboldt Redwoods, Trinity Canyon (Hwy 299), Lassen NP, Yosemite, Mammoth/395. Cell signal is spotty or nonexistent in these areas.', done:false},
+  {id:'v4', text:'Pack car trash bin + trash bags', sub:'12 days × 7 people = a lot of wrappers. Makes a huge difference.', done:false},
+  {id:'v5', text:'Charge all portable power banks', sub:'Long driving days drain phones fast. One bank per phone minimum.', done:false},
+  {id:'v6', text:'Pack a cooler with snacks and drinks', sub:'Days 7, 8, and 11 are very long with limited food stops. Pre-packed lunches save money and time on these days especially.', done:false},
+  {id:'v7', text:'Confirm van height clearance is 8\'4"', sub:'Critical constraint all trip. Avoid parking structures — most cap at 6\'6"-6\'8". Use open-air lots. SF parking pre-booked at 452 Beach St (open air).', done:false},
+];
+
+const PACKING = [
+  {id:'p1', text:'🔦 Flashlights — 1 per person', critical:true, note:'Subway Cave Lava Tubes Day 8 — pitch black, 46°F. Phone flashlights not sufficient.'},
+  {id:'p2', text:'🧥 Jackets for everyone', note:'Subway Cave 46°F, Lassen NP at elevation, Tuolumne Meadows cool even in June.'},
+  {id:'p3', text:'🥾 Hiking shoes for everyone', note:'Vernal Fall Mist Trail (very wet), Lassen, Burney Falls, Tuolumne all involve trail hiking.'},
+  {id:'p4', text:'👙 Swimwear', note:'Big Creek Hideaway heated pool (2 nights), possible Burney Falls wading.'},
+  {id:'p5', text:'🌡️ Sunscreen', note:'Yosemite, Mammoth, and Hwy 395 days involve lots of outdoor exposure.'},
+  {id:'p6', text:'🎫 America the Beautiful Pass (physical)', note:'Covers Lassen NP and Yosemite entrance fees. Keep it accessible in the van.'},
+  {id:'p7', text:'💳 All payment cards', note:'Chase Sapphire (portal bookings), IHG card, Marriott card, backup cash.'},
+  {id:'p8', text:'📄 Printed confirmations', note:'Alcatraz #76191774, SpotHero #123392193, Devils Postpile #423847675, all hotel conf #s.'},
+  {id:'p9', text:'🧺 Laundry supplies', note:'Detergent pods for Big Creek Hideaway (confirm W/D). 10+ days of clothes for 7 people.'},
+  {id:'p10', text:'💊 First aid kit + medications', note:'Motion sickness meds for winding Hwy 299 and Hwy 49. Altitude meds if sensitive (Lassen/Mammoth at 8,000ft+).'},
+  {id:'p11', text:'📷 Camera / extra SD cards', note:'Tunnel View, Marin Vista, Mist Trail, Alabama Hills — lots of photo moments.'},
+  {id:'p12', text:'🎮 Entertainment for the van', note:'Audiobooks, playlists, car games for long driving days (Days 6, 7, 8, 11 are 3-5 hour drives).'},
+  {id:'p13', text:'🎂 Birthday supplies for Jared', note:'Jun 21 is his 20th! Whatever you\'re planning — card, small gift, balloons — pack it.'},
+  {id:'p14', text:'🪣 Reusable water bottles', note:'National parks are hot and dry. Hydration matters especially at Lassen and Yosemite elevation.'},
+];
+
+const HOTELS = [
+  {night:'Jun 11', hotel:'HIEx Paso Robles', pay:'IHG (Chase UR Points)', status:'conf', conf:'65956156'},
+  {night:'Jun 12', hotel:'Travelodge Monterey Bay', pay:'Wyndham', status:'conf', conf:'84852EE096375 / 84852EE096376'},
+  {night:'Jun 13', hotel:'Hampton Inn Watsonville', pay:'Hilton', status:'conf', conf:'81813327 / 86529551'},
+  {night:'Jun 14–15', hotel:'HIEx Walnut Creek (2 nts)', pay:'IHG (Chase Portal / $250 Credit)', status:'conf', conf:'86669052 / 27109835'},
+  {night:'Jun 16', hotel:'BW Plus Humboldt — Garberville', pay:'Best Western Rewards', status:'conf', conf:'152312644'},
+  {night:'Jun 17', hotel:'Fairfield Marriott Redding', pay:'Marriott Bonvoy Points', status:'conf', conf:'81331570 + 81331578'},
+  {night:'Jun 18', hotel:'BW Golden Key Auburn', pay:'Best Western Rewards', status:'conf', conf:'2458410520'},
+  {night:'Jun 19–20', hotel:'Big Creek Hideaway — Groveland', pay:'Vacasa / Cash', status:'conf', conf:'BB7H-DVSS'},
+  {night:'Jun 21', hotel:'Embassy Suites Valencia', pay:'Hilton (via Expedia)', status:'conf', conf:'73447330119297'},
+];
+
+const EXCURSIONS = [
+  {day:'All', name:'America the Beautiful Pass', detail:'Covers Lassen NP + Yosemite entrance', status:'conf', ref:'Physical pass'},
+  {day:'Day 2', name:'Monterey Bay Aquarium', detail:'3 adults $65 + 4 youth $50 = $395', status:'conf', ref:'✅ Booked'},
+  {day:'Day 3', name:'Mystery Spot Santa Cruz', detail:'7 × $12 = $84 · 12:12pm Jun 13', status:'conf', ref:'✅ 12:12pm'},
+  {day:'Days 4,6,12', name:'Six Flags — All 3 Parks', detail:'Great America, Discovery Kingdom, Magic Mountain · Meal plans + parking included', status:'conf', ref:'✅ Season passes'},
+  {day:'Day 5', name:'Alcatraz City Cruises', detail:'7 people · $335.65 · 9:20am Jun 15 · Pier 33 by 8:50am', status:'conf', ref:'#76191774'},
+  {day:'Day 5', name:'SF Parking — 452 Beach St', detail:'SpotHero · Plate 8SQJ853 · 8am–8pm Jun 15', status:'conf', ref:'#123392193'},
+  {day:'Day 5', name:'MuniMobile Cable Car Passes', detail:'$15 × 7 = $105 · Purchased ✅ — activate morning of Jun 15', status:'conf', ref:'Activate day-of'},
+  {day:'Day 11', name:'Devils Postpile Shuttle', detail:'3 adults × $15 + 4 kids × $7 = $73 · Jun 21', status:'conf', ref:'#423847675'},
+  {day:'Day 11', name:'Gojira Ramen & Sushi 🎂', detail:'5:00pm · 452 Old Mammoth Rd Ste 109 · Jared\'s 20th birthday dinner', status:'conf', ref:'(760) 965-0080'},
+];
+
+const NOTES = [
+  {emoji:'🚐', title:'Van Height is 8\'4" — a Hard Constraint All Trip', body:'Most urban parking structures cap at 6\'6"–6\'8". Always use open-air lots. SF parking pre-booked at 452 Beach St (open air). Hwy 36 Garberville→Redding is ruled out — dangerous one-lane road for a large vehicle. Hwy 299 via Eureka is the correct route.'},
+  {emoji:'🌋', title:'Lassen Volcanic NP — Two Scenarios', body:'<strong>Plan A (road open):</strong> SW entrance → Sulphur Works → Bumpass Hell hike (3 mi) → Lake Helen → Lassen Peak → Manzanita Lake. <strong>Plan B (most likely):</strong> SW entrance → Sulphur Works → exterior drive → NW entrance → Manzanita Lake → Loomis Museum. Bumpass Hell trail typically opens July 4 weekend — unlikely open Jun 18. Check nps.gov/lavo ~Jun 4.'},
+  {emoji:'⛽', title:'Costco Gas Strategy', body:'Fill completely at <strong>Roseville (Day 9)</strong> — last Costco for ~280 miles before Groveland/Yosemite. No Costco on Days 10–11 (Yosemite, Mammoth, Hwy 395) — fill in Lee Vining before descending to Mammoth. Expensive but no alternative. Next Costco after Mammoth is Santa Clarita on Day 12.'},
+  {emoji:'🎢', title:'Six Flags Meal Plan Rules', body:'Each person gets 2 meals per park day. A <strong>4-hour gap is required</strong> between meals — plan accordingly. Parks: Great America (Day 4), Discovery Kingdom (Day 6), Magic Mountain (Day 12). Meal plan also includes parking on all three days.'},
+  {emoji:'🌊', title:'Mist Trail at Yosemite — Bring a Change of Clothes', body:'Vernal Fall Mist Trail on Day 10 is extremely wet — you WILL get soaked. Pack a full change of clothes and waterproof bags for phones. The views are worth it. Start early (trailhead by 9am) to beat crowds.'},
+  {emoji:'🔦', title:'Subway Cave Lava Tubes — Flashlights Required', body:'Day 8 near Lassen. Pitch black inside, 46°F year-round. Phone flashlights are not bright enough. Bring one proper flashlight or headlamp per person. Free to enter, short walk from parking.'},
+  {emoji:'🎂', title:'Jared\'s 20th Birthday — Jun 21', body:'Dinner confirmed at <strong>Gojira Ramen & Sushi, 5:00pm</strong> — 452 Old Mammoth Rd Ste 109, Mammoth Lakes. (760) 965-0080. Jared\'s pick! Father\'s Day doubles up on the same day. Plan ahead for any birthday surprise you want to bring.'},
+];
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+const STATE_KEY = KEY;
+function loadState(){ try{ return JSON.parse(localStorage.getItem(STATE_KEY)||'{}'); }catch(e){ return {}; } }
+function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)); }
+let STATE = loadState();
+
+function toggle(id, type){
+  STATE[id] = !STATE[id];
+  saveState(STATE);
+  render();
+}
+
+function buildCheckItem(item, type){
+  const done = item.done || STATE[item.id];
+  const cls = [
+    'check-item',
+    done ? 'done' : '',
+    !done && item.type === 'urgent' ? 'urgent' : '',
+    !done && item.type === 'warn' ? 'warn' : ''
+  ].filter(Boolean).join(' ');
+  return `<div class="${cls}" onclick="toggle('${item.id}','${type}')">
+    <div class="check-box">${done?'✓':''}</div>
+    <div class="ci-body">
+      <div class="ci-text">${item.text}
+        ${!done && item.type==='urgent' ? '<span class="ci-badge urgent">Urgent</span>' : ''}
+        ${done ? '<span class="ci-badge conf">Done ✓</span>' : ''}
+      </div>
+      ${item.sub ? `<div class="ci-sub">${item.sub}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function buildPackItem(item){
+  const done = STATE[item.id];
+  return `<div class="pack-item ${done?'done':''}" onclick="toggle('${item.id}','pack')">
+    <div class="pack-box">${done?'✓':''}</div>
+    <span>${item.text}</span>
+  </div>`;
+}
+
+function buildHotelRow(h){
+  const cls = h.status==='conf'?'sb-conf':h.status==='pend'?'sb-pend':'sb-miss';
+  const label = h.status==='conf'?'✓ Confirmed':h.status==='pend'?'Pending':'⚠ Missing #';
+  return `<tr>
+    <td><strong>${h.night}</strong></td>
+    <td>${h.hotel}</td>
+    <td style="color:var(--muted)">${h.pay}</td>
+    <td><span class="status-badge ${cls}">${label}</span></td>
+    <td><div class="conf-num">${h.conf}</div></td>
+  </tr>`;
+}
+
+function buildExcRow(e){
+  const cls = e.status==='conf'?'sb-conf':e.status==='pend'?'sb-pend':'sb-miss';
+  const label = e.status==='conf'?'✓ Confirmed':e.status==='pend'?'Pending':'⚠ Needed';
+  return `<tr>
+    <td><strong>${e.day}</strong></td>
+    <td>${e.name}</td>
+    <td style="color:var(--muted);font-size:.71rem;">${e.detail}</td>
+    <td><span class="status-badge ${cls}">${label}</span></td>
+    <td><div class="conf-num">${e.ref}</div></td>
+  </tr>`;
+}
+
+function buildNote(n){
+  return `<div class="note-card"><strong>${n.emoji} ${n.title}</strong><br>${n.body}</div>`;
+}
+
+function render(){
+  // Checklist sections
+  const sections = [
+    {id:'urgent', items:URGENT, type:'urgent'},
+    {id:'conf', items:CONF_NEEDED, type:'conf'},
+    {id:'dayof', items:DAYOF, type:'dayof'},
+    {id:'van', items:VAN, type:'van'},
+  ];
+
+  sections.forEach(sec => {
+    document.getElementById('list-'+sec.id).innerHTML = sec.items.map(i => buildCheckItem(i, sec.id)).join('');
+    const done = sec.items.filter(i => i.done || STATE[i.id]).length;
+    document.getElementById('sc-'+sec.id).textContent = `${done}/${sec.items.length}`;
+  });
+
+  document.getElementById('list-pack').innerHTML = PACKING.map(buildPackItem).join('');
+  const packDone = PACKING.filter(i => STATE[i.id]).length;
+  document.getElementById('sc-pack').textContent = `${packDone}/${PACKING.length}`;
+
+  document.getElementById('hotelTable').innerHTML = HOTELS.map(buildHotelRow).join('');
+  document.getElementById('excTable').innerHTML = EXCURSIONS.map(buildExcRow).join('');
+  document.getElementById('list-notes').innerHTML = NOTES.map(buildNote).join('');
+
+  // Stats
+  const allCheck = [...URGENT,...CONF_NEEDED,...DAYOF,...VAN];
+  const totalCheck = allCheck.length + PACKING.length;
+  const doneCheck = allCheck.filter(i => i.done || STATE[i.id]).length + packDone;
+  const urgentLeft = URGENT.filter(i => !i.done && !STATE[i.id] && i.type==='urgent').length;
+  const todoLeft = allCheck.filter(i => !i.done && !STATE[i.id]).length;
+  const pct = Math.round((doneCheck/totalCheck)*100);
+
+  document.getElementById('cntConf').textContent = doneCheck;
+  document.getElementById('cntTodo').textContent = todoLeft;
+  document.getElementById('cntUrgent').textContent = urgentLeft;
+  document.getElementById('cntTotal').textContent = totalCheck;
+  document.getElementById('pctDone').textContent = pct+'%';
+  document.getElementById('progressBar').style.width = pct+'%';
+  document.getElementById('progLabel').textContent = `${doneCheck} of ${totalCheck} items checked`;
+  document.getElementById('fConf').textContent = doneCheck;
+  document.getElementById('fTodo').textContent = todoLeft;
+  document.getElementById('fPct').textContent = pct+'%';
+
+  // Days out
+  const today = new Date();
+  const depart = new Date('2026-06-11');
+  const diff = Math.ceil((depart-today)/(1000*60*60*24));
+  document.getElementById('daysOut').textContent = diff > 0 ? `${diff} Days to Go` : diff === 0 ? 'Today\'s the Day! 🚗' : 'Trip in Progress! 🌴';
+}
+
+function exportChecklist(){
+  const json = JSON.stringify(STATE, null, 2);
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;flex-direction:column;padding:1.5rem;gap:1rem;';
+  overlay.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:#e8b84b;letter-spacing:.06em;">📤 Export Checklist Progress</div>
+      <button onclick="this.closest('[style]').remove()" style="background:transparent;border:1px solid rgba(255,255,255,0.3);color:white;padding:.4rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;">✕ Close</button>
+    </div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,0.7);line-height:1.6;">
+      <strong style="color:#e8b84b;">Step 1:</strong> Click <strong>📋 Copy to Clipboard</strong> below.<br>
+      <strong style="color:#e8b84b;">Step 2:</strong> Open a text editor, paste, and save as <strong>checklist_progress.json</strong><br>
+      <strong style="color:#e8b84b;">Step 3:</strong> On any other device or browser, open the checklist and click <strong>📥 Import Progress</strong>
+    </div>
+    <textarea id="exportJson" readonly style="flex:1;background:#0d1117;color:#6db87a;font-family:monospace;font-size:.75rem;padding:1rem;border:1px solid rgba(201,146,42,.4);border-radius:4px;resize:none;outline:none;">${json}</textarea>
+    <button onclick="const t=document.getElementById('exportJson');t.select();document.execCommand('copy');this.textContent='✅ Copied!';setTimeout(()=>this.textContent='📋 Copy to Clipboard',2000);"
+      style="background:#c9922a;color:white;border:none;padding:.6rem 1.2rem;border-radius:4px;font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;">
+      📋 Copy to Clipboard
+    </button>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>{const t=document.getElementById('exportJson');if(t){t.focus();t.select();}},100);
+}
+
+function importChecklist(){
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;flex-direction:column;padding:1.5rem;gap:1rem;';
+  overlay.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:#e8b84b;letter-spacing:.06em;">📥 Import Checklist Progress</div>
+      <button onclick="this.closest('[style]').remove()" style="background:transparent;border:1px solid rgba(255,255,255,0.3);color:white;padding:.4rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;">✕ Close</button>
+    </div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,0.7);line-height:1.6;">
+      Open your <strong style="color:#e8b84b;">checklist_progress.json</strong> file in a text editor, select all, copy, then paste below.
+    </div>
+    <textarea id="importJson" placeholder="Paste your exported JSON here..." style="flex:1;background:#0d1117;color:#6db87a;font-family:monospace;font-size:.75rem;padding:1rem;border:1px solid rgba(201,146,42,.4);border-radius:4px;resize:none;outline:none;"></textarea>
+    <button onclick="
+      const t=document.getElementById('importJson').value.trim();
+      if(!t){alert('Please paste your JSON data first.');return;}
+      try{
+        const d=JSON.parse(t);
+        if(confirm('Load this progress? Your current checklist state will be replaced.')){
+          localStorage.setItem('${KEY}',JSON.stringify(d));
+          STATE=d;
+          this.closest('[style]').remove();
+          render();
+        }
+      }catch(e){alert('Invalid JSON — make sure you copied the full export text.');}
+    " style="background:#3d7a52;color:white;border:none;padding:.6rem 1.2rem;border-radius:4px;font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;">
+      📥 Load This Progress
+    </button>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById('importJson')?.focus(),100);
+}
+
+function resetAll(){
+  if(confirm('Reset all checklist progress? This cannot be undone.')){
+    localStorage.removeItem(STATE_KEY);
+    STATE = {};
+    render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>

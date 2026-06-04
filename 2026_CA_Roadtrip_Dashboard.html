@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026_CA_Roadtrip_Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#1a1410;--paper:#f5f0e8;--cream:#ede8dc;--gold:#c9922a;--gold-light:#e8b84b;
+  --rust:#b5451b;--sage:#3d7a52;--sky:#2d6a8f;--muted:#8a8070;
+  --border:rgba(26,20,16,0.12);--shadow:rgba(26,20,16,0.07);
+  --bc:#2d6a3f;--bb:#d4edda;--pc:#856404;--pb:#fff3cd;--uc:#721c24;--ub:#f8d7da;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;
+  background-image:radial-gradient(ellipse at 15% 0%,rgba(201,146,42,.09) 0%,transparent 55%),
+  radial-gradient(ellipse at 85% 100%,rgba(45,106,143,.07) 0%,transparent 55%);}
+header{background:var(--ink);color:var(--paper);padding:1.75rem 2.5rem 0;position:relative;overflow:hidden;}
+header::before{content:'CALIFORNIA';position:absolute;right:-10px;top:50%;transform:translateY(-60%);
+  font-family:'Bebas Neue',sans-serif;font-size:7.5rem;color:rgba(255,255,255,.035);letter-spacing:.04em;pointer-events:none;white-space:nowrap;}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.trip-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,4.8rem);letter-spacing:.04em;line-height:.88;color:var(--paper);}
+.trip-title span{color:var(--gold-light);}
+.trip-meta{text-align:right;font-size:.75rem;color:rgba(245,240,232,.55);text-transform:uppercase;letter-spacing:.1em;line-height:2.1;}
+.trip-meta strong{color:var(--gold-light);display:block;font-size:1.05rem;}
+.summary-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;
+  background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.07);margin-top:1.5rem;}
+.sstat{background:rgba(245,240,232,.04);padding:.8rem 1rem;text-align:center;}
+.sstat .num{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--gold-light);line-height:1;}
+.sstat .num.g{color:#6db87a;}.sstat .num.a{color:#f0b429;}.sstat .num.r{color:#e05c5c;}
+.sstat .lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,240,232,.45);margin-top:.2rem;}
+.tab-nav{background:var(--ink);display:flex;align-items:stretch;gap:0;padding:0 2rem;border-bottom:2px solid var(--gold);}
+.tab-nav a{display:flex;align-items:center;gap:.45rem;padding:.6rem 1.2rem;font-family:'DM Sans',sans-serif;
+  font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;
+  color:rgba(245,240,232,.4);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab-nav a:hover{color:rgba(245,240,232,.75);}
+.tab-nav a.active{color:var(--goldL);border-bottom-color:var(--gold);}
+.tab-nav .trip-id{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--goldL);
+  letter-spacing:.06em;margin-right:1rem;display:flex;align-items:center;padding:.5rem 0;
+  border-right:1px solid rgba(255,255,255,.1);padding-right:1.2rem;}
+  border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+.lbl-k{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-right:.25rem;}
+.badge{display:inline-flex;align-items:center;gap:.2rem;padding:.1rem .45rem;border-radius:3px;
+  font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;}
+.b-booked{background:var(--bb);color:var(--bc);}.b-pending{background:var(--pb);color:var(--pc);}
+.b-unbooked{background:var(--ub);color:var(--uc);}.b-marriott{background:#dce8f5;color:#1a4a7a;}
+.b-ihg{background:#e8ddf5;color:#4a1a7a;}.b-chase{background:#fdf0d5;color:#7a4a1a;}
+.b-chase-pts{background:#fde8d5;color:#7a3a0a;}.b-hilton{background:#d5e8f5;color:#1a3a6a;}
+.b-wyndham{background:#f5e8d5;color:#6a3a1a;}.b-expedia{background:#dde8f5;color:#1a3a7a;}
+.b-cash{background:#e8ede8;color:#2d4a2d;}
+.container{max-width:1380px;margin:0 auto;padding:1.75rem 1.5rem 6rem;}
+.toolbar{display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center;}
+.fbtn{padding:.33rem .85rem;border:1.5px solid var(--border);background:white;border-radius:3px;
+  font-family:'DM Sans',sans-serif;font-size:.67rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;cursor:pointer;transition:all .15s;color:var(--muted);}
+.fbtn:hover{border-color:var(--gold);color:var(--gold);}
+.fbtn.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.tsep{flex:1;}
+.days-grid{display:flex;flex-direction:column;gap:.85rem;}
+.day-card{background:white;border:1px solid var(--border);border-radius:6px;overflow:hidden;
+  box-shadow:0 2px 10px var(--shadow);transition:box-shadow .2s;}
+.day-card:hover{box-shadow:0 4px 22px rgba(26,20,16,.11);}
+.day-card.booked{border-left:4px solid #6db87a;}
+.day-card.pending{border-left:4px solid #f0b429;}
+.day-card.unbooked{border-left:4px solid #e05c5c;}
+.day-hdr{display:grid;grid-template-columns:56px 1fr auto;gap:.85rem;padding:.9rem 1.25rem;
+  align-items:center;background:rgba(245,240,232,.38);border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none;}
+.dnum{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:var(--gold);line-height:1;text-align:center;}
+.ddate{font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:.16rem;}
+.droute{font-family:'DM Serif Display',serif;font-size:1.04rem;color:var(--ink);line-height:1.2;}
+.dright{display:flex;flex-direction:column;align-items:flex-end;gap:.28rem;}
+.dcost{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;color:var(--gold);white-space:nowrap;}
+.dcost .csub{font-family:'DM Sans',sans-serif;font-size:.58rem;color:var(--muted);margin-left:2px;}
+.expand-ic{font-size:.63rem;color:var(--muted);margin-top:.2rem;transition:transform .2s;}
+.day-card.expanded .expand-ic{transform:rotate(180deg);}
+.day-body{display:none;padding:1.1rem 1.25rem;gap:1.25rem;grid-template-columns:1fr 1fr;}
+.day-card.expanded .day-body{display:grid;}
+@media(max-width:680px){.day-body{grid-template-columns:1fr;}}
+.stitle{font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);
+  margin-bottom:.5rem;padding-bottom:.32rem;border-bottom:1px solid var(--border);}
+.act-list{list-style:none;display:flex;flex-direction:column;gap:.28rem;}
+.act-item{display:flex;align-items:flex-start;gap:.48rem;font-size:.77rem;line-height:1.38;}
+.atime{color:var(--muted);font-size:.67rem;white-space:nowrap;min-width:52px;flex-shrink:0;}
+.aemoji{flex-shrink:0;font-size:.84rem;}
+.hpanel{display:flex;flex-direction:column;gap:.6rem;}
+.sp-note{background:rgba(201,146,42,.08);border:1px solid rgba(201,146,42,.22);border-radius:4px;
+  padding:.5rem .72rem;font-size:.72rem;line-height:1.5;grid-column:1/-1;}
+.sp-note strong{color:var(--gold);}
+.ch-container{display:flex;flex-direction:column;gap:.32rem;}
+.hotelopt{display:flex;align-items:flex-start;gap:.48rem;font-size:.75rem;padding:.36rem .58rem;
+  border:1.5px solid var(--border);border-radius:4px;cursor:pointer;transition:all .14s;background:white;}
+.hotelopt:hover{border-color:var(--gold);background:rgba(201,146,42,.04);}
+.hotelopt .stars{color:var(--gold);font-size:.58rem;}
+.hotelopt .osub{font-size:.67rem;color:var(--muted);margin-top:1px;}
+.cust-badge{display:inline-block;font-size:.57rem;padding:.07rem .32rem;background:rgba(201,146,42,.15);
+  color:var(--gold);border-radius:2px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;
+  margin-left:.28rem;vertical-align:middle;}
+.rm-hbtn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.76rem;padding:0 .22rem;
+  transition:color .14s;flex-shrink:0;}
+.rm-hbtn:hover{color:var(--rust);}
+.ahtog{display:flex;align-items:center;gap:.38rem;font-size:.67rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--gold);cursor:pointer;padding:.28rem 0;border:none;background:none;
+  font-family:'DM Sans',sans-serif;transition:color .14s;}
+.ahtog:hover{color:var(--rust);}
+.ahtog .ti{transition:transform .2s;font-size:.88rem;}
+.ahtog.open .ti{transform:rotate(45deg);}
+.ahform{display:none;flex-direction:column;gap:.42rem;background:rgba(201,146,42,.05);
+  border:1.5px dashed rgba(201,146,42,.28);border-radius:5px;padding:.72rem;margin-top:.18rem;}
+.ahform.open{display:flex;}
+.hform{display:flex;flex-direction:column;gap:.5rem;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.fgrp{display:flex;flex-direction:column;gap:.18rem;}
+.fgrp label{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;}
+.fgrp input,.fgrp select,.fgrp textarea{padding:.42rem .62rem;border:1.5px solid var(--border);border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:.79rem;color:var(--ink);background:var(--paper);
+  transition:border-color .14s;width:100%;}
+.fgrp input:focus,.fgrp select:focus,.fgrp textarea:focus{outline:none;border-color:var(--gold);background:white;}
+.fgrp textarea{resize:vertical;min-height:52px;}
+.pay-grid{display:flex;gap:.32rem;flex-wrap:wrap;}
+.pbtn{padding:.26rem .6rem;border:1.5px solid var(--border);border-radius:3px;font-size:.6rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;transition:all .14s;
+  background:white;color:var(--muted);}
+.pbtn:hover{border-color:var(--gold);}
+.pbtn.sel{border-width:2px;}
+.pbtn.marriott.sel{background:#dce8f5;color:#1a4a7a;border-color:#1a4a7a;}
+.pbtn.ihg.sel{background:#e8ddf5;color:#4a1a7a;border-color:#4a1a7a;}
+.pbtn.chase.sel{background:#fdf0d5;color:#7a4a1a;border-color:#d4850a;}
+.pbtn.chase-pts.sel{background:#fde8d5;color:#7a3a0a;border-color:#c4700a;}
+.pbtn.hilton.sel{background:#d5e8f5;color:#1a3a6a;border-color:#1a5a8a;}
+.pbtn.wyndham.sel{background:#f5e8d5;color:#6a3a1a;border-color:#8a5a3a;}
+.pbtn.expedia.sel{background:#dde8f5;color:#1a3a7a;border-color:#1a5aaa;}
+.pbtn.cash.sel{background:#e8ede8;color:#2d4a2d;border-color:#2d4a2d;}
+.rooms-row{display:flex;align-items:center;gap:.38rem;flex-wrap:wrap;}
+.rbtn{width:33px;height:33px;border:1.5px solid var(--border);border-radius:4px;background:white;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted);cursor:pointer;
+  transition:all .14s;display:flex;align-items:center;justify-content:center;}
+.rbtn:hover{border-color:var(--gold);color:var(--gold);}
+.rbtn.sel{background:var(--ink);color:var(--paper);border-color:var(--ink);font-size:.9rem;}
+.rtotal{font-size:.68rem;color:var(--muted);white-space:nowrap;}
+.stog{display:flex;gap:.32rem;}
+.sbtn{flex:1;padding:.42rem;border:1.5px solid var(--border);border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;cursor:pointer;transition:all .14s;background:white;color:var(--muted);}
+.sbtn:hover{opacity:.82;}
+.sbtn.booked-btn.active{background:var(--bb);color:var(--bc);border-color:#6db87a;}
+.sbtn.pending-btn.active{background:var(--pb);color:var(--pc);border-color:#f0b429;}
+.sbtn.unbooked-btn.active{background:var(--ub);color:var(--uc);border-color:#e05c5c;}
+.save-btn{width:100%;padding:.58rem;background:var(--ink);color:var(--paper);border:none;border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;cursor:pointer;transition:background .14s;margin-top:.12rem;}
+.save-btn:hover{background:var(--gold);}
+.ah-addbtn{padding:.38rem .8rem;background:var(--gold);color:white;border:none;border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:.67rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;cursor:pointer;transition:background .14s;align-self:flex-start;}
+.ah-addbtn:hover{background:var(--rust);}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;
+  padding:.42rem .5rem;margin:-.1rem -.5rem .5rem;border-radius:4px;transition:background .14s;}
+.sec-hdr:hover{background:rgba(201,146,42,.07);}
+.sec-hdr .stitle{margin-bottom:0;padding-bottom:0;border-bottom:none;flex:1;}
+.sec-hdr .sec-ic{font-size:.6rem;color:var(--muted);transition:transform .2s;margin-left:.5rem;}
+.sec-hdr.open .sec-ic{transform:rotate(180deg);}
+.sec-body{overflow:hidden;transition:max-height .25s ease,opacity .2s ease;}
+.sec-body.closed{max-height:0!important;opacity:0;pointer-events:none;}
+.exc-sec{border-top:1px solid var(--border);padding-top:.85rem;margin-top:.1rem;grid-column:1/-1;}
+.din-sec{border-top:1px solid var(--border);padding-top:.85rem;margin-top:.1rem;grid-column:1/-1;}
+.meal-tabs{display:flex;gap:.4rem;margin-bottom:.75rem;border-bottom:1px solid var(--border);padding-bottom:.6rem;}
+.meal-tab{padding:.32rem .9rem;border:1.5px solid var(--border);border-radius:3px;
+  font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;cursor:pointer;transition:all .15s;background:white;color:var(--muted);}
+.meal-tab:hover{border-color:var(--gold);color:var(--gold);}
+.meal-tab.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.meal-panel{display:flex;flex-direction:column;gap:.4rem;}
+.meal-add-row{display:flex;gap:.38rem;flex-wrap:wrap;align-items:center;margin-top:.5rem;}
+.din-addr-inp{width:170px;}.din-res-sel{width:115px;cursor:pointer;}.din-notes-inp{flex:1;min-width:100px;}
+.din-list{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.55rem;}
+.din-item{display:flex;align-items:flex-start;gap:.48rem;padding:.42rem .62rem;
+  background:rgba(45,106,143,.05);border:1px solid rgba(45,106,143,.15);border-radius:4px;font-size:.77rem;flex-wrap:wrap;}
+.din-name{font-weight:600;color:var(--ink);min-width:120px;flex:2;}
+.din-addr{font-size:.68rem;color:var(--sky);min-width:140px;flex:2;word-break:break-word;}
+.din-addr a{color:var(--sky);text-decoration:none;}
+.din-addr a:hover{text-decoration:underline;}
+.din-res{font-size:.68rem;white-space:nowrap;font-weight:600;}
+.din-res.made{color:var(--sage);}
+.din-res.needed{color:var(--rust);}
+.din-res.walkIn{color:var(--muted);}
+.din-res.none{color:var(--muted);}
+.din-notes{font-size:.68rem;color:var(--muted);flex:2;min-width:100px;}
+.din-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.76rem;padding:0 .18rem;transition:color .14s;flex-shrink:0;margin-left:auto;}
+.din-rm:hover{color:var(--rust);}
+.exc-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;}
+.exc-dtotal{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold);}
+.exc-list{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.55rem;}
+.exc-item{display:flex;align-items:center;gap:.48rem;padding:.42rem .62rem;
+  background:rgba(201,146,42,.05);border:1px solid rgba(201,146,42,.13);border-radius:4px;font-size:.77rem;}
+.xemoji{font-size:.88rem;flex-shrink:0;}
+.xname{flex:1;font-weight:500;}
+.xbrkd{font-size:.65rem;color:var(--muted);white-space:nowrap;}
+.xamount{font-family:'Bebas Neue',sans-serif;font-size:.93rem;color:var(--rust);white-space:nowrap;}
+.xrm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.76rem;padding:0 .18rem;
+  transition:color .14s;}
+.xrm:hover{color:var(--rust);}
+.exc-add{display:flex;gap:.38rem;flex-wrap:wrap;align-items:center;}
+.xinp{padding:.4rem .52rem;border:1.5px solid var(--border);border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:.77rem;color:var(--ink);background:var(--paper);
+  transition:border-color .14s;}
+.xinp:focus{outline:none;border-color:var(--gold);background:white;}
+.xi-name{flex:2;min-width:130px;}
+.xi-cost{width:76px;}.xi-pax{width:65px;}.xi-cat{width:138px;cursor:pointer;}
+.xadd-btn{padding:.4rem .8rem;background:var(--gold);color:white;border:none;border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;cursor:pointer;transition:background .14s;white-space:nowrap;}
+.xadd-btn:hover{background:var(--rust);}
+.total-bar{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--paper);
+  padding:.72rem 2rem;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.7rem;border-top:2px solid var(--gold);z-index:200;
+  box-shadow:0 -4px 20px rgba(26,20,16,.25);}
+.tstat{text-align:center;}
+.tbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,240,232,.5);}
+.tamt{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;color:var(--gold-light);letter-spacing:.04em;}
+.tamt.sm{font-size:1.22rem;}.tamt.g{color:#6db87a;}.tamt.r{color:#e05c5c;}
+.tgrp{display:flex;gap:1.65rem;align-items:center;}
+@media print{.save-btn,.fbtn,.total-bar,.toolbar{display:none!important;}
+  .day-card.expanded .day-body,.day-body{display:grid!important;}body{padding-bottom:0;}}
+</style>
+</head>
+<body>
+<nav class="tab-nav">
+  <div class="trip-id">2026 CA Road Trip</div>
+  <a href="2026_CA_Roadtrip_Dashboard.html" class="active">📋 Trip Dashboard</a>
+  <a href="2026_CA_Roadtrip_Map.html">🗺 Interactive Map</a>
+  <a href="2026_CA_Roadtrip_Checklist.html">✅ Pre-Departure Checklist</a>
+</nav>
+<header>
+  <div class="hdr-top">
+    <div>
+      <div class="trip-title">Road Trip<br><span>California</span></div>
+      <div style="margin-top:.5rem;font-size:.7rem;color:rgba(245,240,232,.42);letter-spacing:.1em;text-transform:uppercase;">Jun 11 – 22, 2026 &nbsp;·&nbsp; 12 Days · 7 Travelers</div>
+    </div>
+    <div class="trip-meta">
+      <strong id="hdr-booked">0/9</strong>nights booked
+      <strong id="hdr-cost">$0</strong>hotel total
+      <strong>7</strong>travelers · Ford Transit
+    </div>
+  </div>
+  <div class="summary-bar">
+    <div class="sstat"><div class="num g" id="s-booked">0</div><div class="lbl">Nights Booked</div></div>
+    <div class="sstat"><div class="num a" id="s-pending">0</div><div class="lbl">Pending</div></div>
+    <div class="sstat"><div class="num r" id="s-rem">9</div><div class="lbl">Still to Book</div></div>
+    <div class="sstat"><div class="num" id="s-hotel">$0</div><div class="lbl">Hotel Cost</div></div>
+    <div class="sstat"><div class="num g" id="s-saved">$0</div><div class="lbl">Points / Credits</div></div>
+    <div class="sstat"><div class="num" id="s-exc">$0</div><div class="lbl">Excursions</div></div>
+    <div class="sstat"><div class="num" id="s-grand">$0</div><div class="lbl">Grand Total</div></div>
+  </div>
+</header>
+<div class="legend">
+  <span class="lbl-k">Key:</span>
+  <span class="badge b-booked">✓ Booked</span><span class="badge b-pending">⏳ Pending</span>
+  <span class="badge b-unbooked">✗ Not Booked</span><span class="badge b-marriott">Marriott Pts</span>
+  <span class="badge b-ihg">IHG Pts</span><span class="badge b-chase">Chase Portal $</span>
+  <span class="badge b-chase-pts">Chase UR Pts</span><span class="badge b-hilton">Hilton Pts</span>
+  <span class="badge b-wyndham">Wyndham Pts</span><span class="badge b-expedia">Expedia</span>
+  <span class="badge b-cash">Cash / Card</span>
+</div>
+<div class="container">
+  <div class="toolbar">
+    <button class="fbtn active" onclick="filterDays('all',this)">All Days</button>
+    <button class="fbtn" onclick="filterDays('unbooked',this)">Not Booked</button>
+    <button class="fbtn" onclick="filterDays('pending',this)">Pending</button>
+    <button class="fbtn" onclick="filterDays('booked',this)">Booked</button>
+    <div class="tsep"></div>
+    <button class="fbtn" onclick="expandAll()">Expand All</button>
+    <button class="fbtn" onclick="collapseAll()">Collapse All</button>
+    <div class="tsep"></div>
+    <button class="fbtn" onclick="exportData()" title="Download all trip data as a JSON file">📤 Export Data</button>
+    <button class="fbtn" onclick="importData()" title="Load trip data from a previously exported JSON">📥 Import Data</button>
+  </div>
+  <div class="days-grid" id="daysGrid"></div>
+</div>
+<div class="total-bar">
+  <div class="tstat"><div class="tbl">Hotel Cost</div><div class="tamt" id="ft-hotel">$0</div></div>
+  <div class="tgrp">
+    <div class="tstat"><div class="tbl">Excursions</div><div class="tamt sm" id="ft-exc">$0</div></div>
+    <div class="tstat"><div class="tbl">Grand Total</div><div class="tamt sm" id="ft-grand">$0</div></div>
+    <div class="tstat"><div class="tbl">Points Saved</div><div class="tamt sm g" id="ft-saved">$0</div></div>
+    <div class="tstat"><div class="tbl">Booked</div><div class="tamt sm" id="ft-booked">0/9</div></div>
+  </div>
+</div>
+<script>
+const PL={marriott:'Marriott Bonvoy Pts',ihg:'IHG One Pts',chase:'Chase Portal $',
+  'chase-pts':'Chase UR Pts',hilton:'Hilton Pts',wyndham:'Wyndham Pts',
+  expedia:'Expedia',cash:'Cash / Card'};
+const PTS_PAYMENTS=['marriott','ihg','chase-pts','wyndham','hilton'];
+
+const DAYS=[
+  {num:1,date:"Thu, Jun 11",nights:1,route:"Irvine → Santa Barbara → Solvang → Paso Robles",
+   acts:[{t:"7:00am",e:"🚗",x:"Depart Irvine"},
+    {t:"7:00am",e:"⛽",x:"⛽ COSTCO GAS: Fill up before leaving — 115 Technology Dr, Irvine (opens 5:30am). Next Costco is Oxnard, 70 miles north."},
+    {t:"8:30am",e:"☕",x:"Ventura/Carpinteria coffee stop — or Costco Oxnard gas if needed (2001 E Ventura Blvd, Oxnard)"},
+    {t:"9:30am",e:"⛪",x:"Old Mission Santa Barbara — self-guided audio tour, rose garden, cemetery, 12-acre grounds (~1.5 hrs). Open 9:30am. 2030 Laguna St."},
+    {t:"11:00am",e:"🌳",x:"Moreton Bay Fig Tree (5 min, free) — largest tree in North America!"},
+    {t:"11:10am",e:"⛽",x:"⛽ COSTCO GAS (optional): Goleta — 7095 Market Place Dr, Goleta, CA 93117. Just west of Santa Barbara if you need a top-up."},
+    {t:"11:15am",e:"🌊",x:"Stearns Wharf + State Street stroll (~30 min)"},
+    {t:"12:00pm",e:"🇩🇰",x:"Solvang (~2 hrs) — aebleskiver at Solvang Restaurant, windmills, Danish bakeries"},
+    {t:"12:15pm",e:"🦃",x:"🛑 ROADSIDE STOP: Ostrichland USA — 200 ostriches + emus you hand-feed through the fence! 25¢ gumball machine feed. Ostrich jerky for sale. On Hwy 246 en route to Solvang. FREE to stop!"},
+    {t:"1:00pm",e:"🧜",x:"Little Mermaid Statue — photo stop at Alisal Rd & Mission Dr in Solvang (30 sec, free)"},
+    {t:"1:05pm",e:"👟",x:"Giant Red Clog — pose with the famous clog at Copenhagen Dr & 1st St outside Solvang Shoe Store (free photo op!)"},
+    {t:"2:15pm",e:"🌊",x:"Pismo Beach — quick stretch and ocean view"},
+    {t:"3:00pm",e:"🌸",x:"Madonna Inn — admire the kitschy decor, grab a slice of pink champagne cake!"},
+    {t:"3:45pm",e:"🫧",x:"SLO + Bubblegum Alley"},
+    {t:"5:00pm",e:"🍷",x:"Arrive Paso Robles — check in HIEx, dinner"}],
+   seed:{status:"booked",hn:"Holiday Inn Express & Suites Paso Robles",pay:"chase-pts",
+    cost:"0",rooms:1,conf:"65956156",notes:"IHG property — manage in IHG One Rewards app. 28,430 Chase Ultimate Reward points redeemed. Single room sleeps 6.",laundry:"✅ Guest laundry + dry cleaning on site"},
+   note:"💳 28,430 Chase UR points. Confirmation: 65956156. Single room sleeps 6 — making it work! | ⛪ Mission opens 9:30am — no reservation needed, pay at door. $17 adults / $12 youth 5-17 / free under 5. Last tickets sold at 4pm.",
+   excSeed:[
+     {id:"e1_miss_v2",name:"Old Mission Santa Barbara",emoji:"⛪",adultCost:17,childCost:12,numAdults:3,numChildren:4,total:99},
+   ],
+   diningSeed:[
+     {id:"d1_solv",name:"Solvang Restaurant",addr:"1672 Copenhagen Dr, Solvang, CA 93463",res:"walkIn",notes:"Famous aebleskiver + Danish sausage. Open daily 6am-5pm summer. Lunch stop en route!",meal:"lunch"},
+     {id:"d1_jeff",name:"Jeffry's Wine Country BBQ",addr:"819 12th St Suite B, Paso Robles, CA 93446",res:"walkIn",notes:"Wood-fired smoked meats, scratch-made sauces, outdoor courtyard. Closed Tue/Wed. Great value.",meal:"dinner"},
+     {id:"d1_fire",name:"Firestone Walker Taproom",addr:"1400 Ramada Dr, Paso Robles, CA 93446",res:"walkIn",notes:"Brewery gastropub — burgers, wings, fish tacos. No reservation needed. Open daily 11am.",meal:"dinner"},
+   ]},
+  {num:2,date:"Fri, Jun 12",nights:1,route:"Paso Robles → Monterey",
+   acts:[{t:"Morning",e:"🍳",x:"Breakfast at hotel"},
+    {t:"8:00am",e:"⛽",x:"⛽ COSTCO GAS: Salinas — 1339 N Davis Rd, Salinas CA 93907. Fill up en route to Monterey — no Costco in Monterey itself. Sand City Costco (801 Tioga Ave) is another option right by Monterey."},
+    {t:"~9:00am",e:"🐙",x:"Monterey Bay Aquarium (3-4 hrs) ✅ Tickets booked!"},
+    {t:"1:00pm",e:"🦞",x:"Cannery Row lunch + browse"},{t:"2:30pm",e:"🌊",x:"17-Mile Drive OR Carmel stroll"},
+    {t:"4:30pm",e:"🏨",x:"Check in Travelodge Monterey Bay"},{t:"6:30pm",e:"🍽️",x:"Dinner"},
+    {t:"8:00pm",e:"🎳",x:"Evening wharf walk or bowling"}],
+   seed:{status:"booked",hn:"Travelodge by Wyndham Monterey Bay",pay:"wyndham",
+    cost:"254",rooms:2,conf:"Room 1: 84852EE096375 | Room 2: 84852EE096376",notes:"Wyndham property — manage in Wyndham app. $254/room/night × 2 rooms. ✅ Confirmed.",laundry:"✅ Coin laundry on site"},
+   note:"✅ CONFIRMED — Room 1: 84852EE096375 | Room 2: 84852EE096376. $254/room × 2 rooms = $508 total.",
+   excSeed:[{id:"e2_aq",name:"Monterey Bay Aquarium",emoji:"🐙",adultCost:65,childCost:50,numAdults:3,numChildren:4,total:65*3+50*4}],
+   diningSeed:[
+     {id:"d2_comp",name:"Compagno's Market & Deli",addr:"2000 Prescott Ave, Monterey, CA 93940",res:"walkIn",notes:"Legendary massive sandwiches — one half feeds 2 people! Local institution since 1970. Closed Tuesdays.",meal:"lunch"},
+     {id:"d2_grotto",name:"Old Fisherman's Grotto",addr:"39 Fisherman's Wharf, Monterey, CA 93940",res:"none",notes:"Classic Cannery Row seafood — award-winning clam chowder, fresh catch, harbor views. Open 11am-9pm.",meal:"lunch"},
+     {id:"d2_ros",name:"Rosine's Restaurant",addr:"434 Alvarado St, Monterey, CA 93940",res:"needed",notes:"Guy Fieri featured. Family-owned 45 yrs, hearty comfort food, huge portions, legendary desserts. Great value.",meal:"dinner"},
+     {id:"d2_cant",name:"El Cantaro",addr:"700 Munras Ave, Monterey, CA 93940",res:"walkIn",notes:"Excellent affordable Mexican, fresh homemade chips and salsa. Very family friendly. Great value.",meal:"dinner"},
+   ]},
+  {num:3,date:"Sat, Jun 13",nights:1,route:"Monterey → Santa Cruz → Watsonville",
+   acts:[{t:"9:00am",e:"🛝",x:"Dennis the Menace Playground (free, 30-45 min)"},
+    {t:"10:15am",e:"🌿",x:"Castroville — Giant Artichoke photo + deep fried hearts!"},
+    {t:"11:30am",e:"⛽",x:"⛽ COSTCO GAS (optional): Santa Cruz — 220 Sylvania Ave, Santa Cruz CA 95060. Top up before the Boardwalk day."},
+    {t:"12:12pm",e:"🌀",x:"Mystery Spot ✅ BOOKED 12:12pm — $12/person + $5 parking"},
+    {t:"2:00pm",e:"🎢",x:"Santa Cruz Boardwalk (3 hrs) — ride wristbands ~$70/person"},
+    {t:"5:30pm",e:"🦋",x:"Natural Bridges State Beach — sunset + tide pools"},
+    {t:"7:30pm",e:"🏨",x:"Check in Hampton Inn Watsonville"}],
+   seed:{status:"booked",hn:"Hampton Inn Watsonville",pay:"hilton",
+    cost:"289.44",rooms:2,conf:"Room 1: 81813327 | Room 2: 86529551",notes:"Hilton property. $289.44/room × 2 rooms = $578.88 total. ✅ Confirmed.",laundry:"✅ Self-serve laundry on site"},
+   note:"✅ CONFIRMED — Room 1: 81813327 | Room 2: 86529551. $289.44/room × 2 = $578.88 total.",
+   excSeed:[
+    {id:"e3_ms",name:"Mystery Spot ✅ 12:12pm Jun 13",emoji:"🌀",adultCost:12,childCost:12,numAdults:2,numChildren:5,total:84},
+    {id:"e3_bw",name:"Boardwalk Ride Wristbands",emoji:"🎢",adultCost:70,childCost:70,numAdults:2,numChildren:5,total:490}],
+   diningSeed:[
+     {id:"d3_pb",name:"The Picnic Basket",addr:"125 Beach St, Santa Cruz, CA 95060",res:"walkIn",notes:"High-quality sandwiches + local produce, right near the beach. Great for families. Perfect Boardwalk lunch.",meal:"lunch"},
+     {id:"d3_pmh",name:"Pizza My Heart 🍕",addr:"1116 Pacific Ave Ste B, Santa Cruz, CA 95060",res:"walkIn",notes:"Iconic surf-themed Santa Cruz pizza — order by the slice, huge portions, very affordable. Family booths, beer & wine. Cult following. Open 11am-midnight.",meal:"lunch"},
+     {id:"d3_pcc",name:"Pacific Cookie Company 🍪",addr:"1203 Pacific Ave, Santa Cruz, CA 95060",res:"walkIn",notes:"Santa Cruz legend since 1980 — fresh-baked cookies all day, 16 flavors, Marianne's ice cream sandwiches. Right next to Pizza My Heart on Pacific Ave. Open 10am-10pm (midnight Fri/Sat).",meal:"lunch"},
+     {id:"d3_corr",name:"Corralitos Market & Sausage Co.",addr:"596 Corralitos Rd, Watsonville, CA 95076",res:"walkIn",notes:"Legendary apple-wood smoked sausages since 1880s. Hot sandwiches, deli meats. Closes 6pm — go early!",meal:"dinner"},
+     {id:"d3_india",name:"India Gourmet",addr:"Watsonville, CA 95076",res:"walkIn",notes:"Well-reviewed Indian food in Watsonville. Butter chicken, masala — bold flavors, great value.",meal:"dinner"},
+   ]},
+  {num:4,date:"Sun, Jun 14",nights:2,route:"Watsonville → Gilroy → Great America → Sunol → Walnut Creek",
+   acts:[{t:"8:30am",e:"🚗",x:"Depart Watsonville"},
+    {t:"9:00am",e:"🧄",x:"Garlic World, Gilroy — garlic ice cream + garlic everything! Right off Hwy 101 (20-30 min stop)"},
+    {t:"9:00am",e:"⛽",x:"⛽ COSTCO GAS: Gilroy — 7251 Camino Arroyo, Gilroy CA 95020. Right near Garlic World — fill up here!"},
+    {t:"9:30am",e:"🎢",x:"Six Flags Great America + Hurricane Harbor water park (full day!) ✅ Passes covered"},
+    {t:"4:30pm",e:"🚗",x:"Drive north via I-680 toward Walnut Creek"},
+    {t:"5:00pm",e:"🐾",x:"Sunol — Bosco the Dog Mayor statue + Bosco's Bones & Brews! (~30 min)"},
+    {t:"5:45pm",e:"🚗",x:"Drive to Walnut Creek (~20 min) — or fill up at Costco Concord (2400 Monument Blvd) en route"},
+    {t:"6:15pm",e:"🏨",x:"Check in Holiday Inn Express Walnut Creek"},
+    {t:"7:30pm",e:"🍽️",x:"Dinner in Walnut Creek — great restaurant scene on Main St"}],
+   seed:{status:"booked",hn:"Holiday Inn Express Walnut Creek by IHG",pay:"ihg",
+    cost:"181.16",rooms:2,conf:"Room 1: 86669052 | Room 2: 27109835",notes:"IHG property — manage in IHG One Rewards app. Booked through Chase Travel portal for $250 IHG credit. $181.16/room × 2 rooms × 2 nights. Activate IHG Platinum Elite in Chase app!",laundry:"✅ Laundry service on request"},
+   note:"💳 USE CHASE $250 IHG CREDIT — booked via Chase Travel portal as 2-night prepaid. $181.16/rm × 2 rms × 2 nts = $724.64 total, ~$474 after credit. ✅ CONFIRMED — Room 1: 86669052 | Room 2: 27109835. Activate IHG Platinum Elite in Chase app!",
+   excSeed:[],diningSeed:[
+     {id:"d4_garlic",name:"🧄 Garlic World",addr:"4800 Monterey Hwy, Gilroy, CA 95020",res:"walkIn",notes:"Garlic ice cream (vanilla + chocolate), garlic chocolate chip cookies, garlic popcorn, sauces & gifts. Right off Hwy 101 — easy in/out!",meal:"lunch"},
+     {id:"d4_sfga",name:"Six Flags Great America — Meal Plan",addr:"4701 Great America Pkwy, Santa Clara, CA 95054",res:"walkIn",notes:"✅ Meal plan covers 2 meals per person (4-hr gap required). Use Meal 1 at lunch, Meal 2 mid-afternoon.",meal:"lunch"},
+     {id:"d4_hav",name:"Havana Restaurant",addr:"1516 Bonanza St, Walnut Creek, CA 94596",res:"none",notes:"California-Cuban cuisine — roasted pork shoulder, mojitos, Chino-Cubana fried rice. Great vibe. Open from 4pm.",meal:"dinner"},
+     {id:"d4_drag",name:"Dragon Pond Chinese",addr:"Walnut Creek, CA 94596",res:"walkIn",notes:"Highly recommended local Chinese — great variety, family friendly, consistently well-priced.",meal:"dinner"},
+   ]},
+  {num:5,date:"Mon, Jun 15",nights:0,route:"Walnut Creek → San Francisco — Alcatraz + City Day",
+   acts:[{t:"7:00am",e:"🍳",x:"Breakfast at Holiday Inn Express — early start!"},
+    {t:"7:15am",e:"🚗",x:"Drive Transit into SF (~40 min). Head straight to Fisherman's Wharf."},
+    {t:"8:00am",e:"🅿️",x:"Park at 452 Beach St — Wharf Central Parking Lot ✅ BOOKED (SpotHero Rental ID: 123392193). Enter after 8:00am, exit before 8:00pm. License plate 8SQJ853. 2 blocks from Pier 33!"},
+    {t:"8:50am",e:"🚢",x:"Arrive Pier 33 Alcatraz Landing — check in (30 min early required)"},
+    {t:"9:20am",e:"🏝️",x:"⚓ Alcatraz ferry departs — Order #76191774 ✅"},
+    {t:"9:35am",e:"🔒",x:"Arrive Alcatraz Island — self-guided audio tour (former guards & inmates narrate!)"},
+    {t:"12:00pm",e:"🚢",x:"Return ferry back to Pier 33"},
+    {t:"12:20pm",e:"🦭",x:"Walk to Pier 39 — sea lions!"},
+    {t:"12:30pm",e:"🍞",x:"Boudin Bakery — sourdough bread bowls for Seth ✅ (160 Jefferson St)"},
+    {t:"1:30pm",e:"🚃",x:"Board Powell-Hyde or Powell-Mason cable car heading south on Powell St — covered by Muni day pass!"},
+    {t:"1:45pm",e:"🎮",x:"Hop off at Powell & O'Farrell — Nintendo SF at 331 Powell St. Jared's highlight ✅ (~45 min)"},
+    {t:"2:45pm",e:"🚃",x:"Reboard cable car north — hop off at Lombard St"},
+    {t:"3:00pm",e:"📸",x:"Lombard Street — walk the famous crookedest block"},
+    {t:"3:45pm",e:"🍫",x:"Ghirardelli Square — ice cream sundaes, well earned! Then walk back to van at 452 Beach St."},
+    {t:"4:30pm",e:"🌉",x:"Drive across Golden Gate Bridge — iconic! Pull over at Marin Vista Point for photos on the north side 🎉"},
+    {t:"5:00pm",e:"🚗",x:"Drive back to Walnut Creek (~40 min)"},
+    {t:"6:15pm",e:"🍽️",x:"Dinner in Walnut Creek"},
+    {t:"Evening",e:"🏨",x:"Sleep Walnut Creek (Night 2 — already booked)"}],
+   seed:{status:"booked",hn:"Holiday Inn Express Walnut Creek (Night 2 — included)",pay:"ihg",
+    cost:"0",rooms:2,conf:"Room 1: 86669052 | Room 2: 27109835",notes:"IHG property — manage in IHG One Rewards app. Included in 2-night Jun 14-15 IHG booking. No separate booking needed.",laundry:"✅ Laundry service on request"},
+   note:"✅ ALCATRAZ BOOKED — Order #76191774. 9:20am departure Jun 15, 7 people, $335.65 total. Arrive Pier 33 by 8:50am. | ✅ PARKING BOOKED — 452 Beach St, Wharf Central Lot. SpotHero Rental ID: 123392193. Plate: 8SQJ853. Enter after 8:00am, exit before 8:00pm. 2 blocks from Pier 33! | 🚃 CABLE CAR: Powell-Hyde/Mason from Boudin → Nintendo (331 Powell) → Lombard → walk to Ghirardelli for ice cream → pick up van → drive Golden Gate → Marin Vista Point → Walnut Creek.",
+   excSeed:[
+     {id:"e5_alc",name:"Alcatraz Day Tour — 9:20am ✅ Order #76191774",emoji:"🏝️",adultCost:47.95,childCost:47.95,numAdults:7,numChildren:0,total:335.65},
+     {id:"e5_muni",name:"MuniMobile 1-Day Cable Car Pass ✅ Purchased — Activate Jun 15 AM",emoji:"🚃",adultCost:15,childCost:15,numAdults:7,numChildren:0,total:105},
+   ],diningSeed:[
+     {id:"d5_boud",name:"Boudin Bakery",addr:"160 Jefferson St, San Francisco, CA 94133",res:"walkIn",notes:"Iconic SF sourdough bread bowls — clam chowder, sandwiches. Right on Fisherman's Wharf. Very affordable.",meal:"lunch"},
+     {id:"d5_wh",name:"Fisherman's Wharf Stalls",addr:"Fisherman's Wharf, San Francisco, CA 94133",res:"walkIn",notes:"Walk-up clam chowder bread bowls, crab cocktails. Eat outside with bay views. Casual and cheap.",meal:"lunch"},
+     {id:"d5_lita",name:"Lita",addr:"Walnut Creek, CA 94596",res:"walkIn",notes:"Latin Caribbean — lively atmosphere, Monday night specials great value (~$15 shrimp taco plate). Very family friendly.",meal:"dinner"},
+     {id:"d5_ram",name:"Ramen Hiroshi",addr:"Walnut Creek, CA 94596",res:"walkIn",notes:"Ramen only — excellent broth, fast service, affordable. Perfect after a big SF day. Very popular with locals.",meal:"dinner"},
+   ]},
+  {num:6,date:"Tue, Jun 16",nights:1,route:"Walnut Creek → Jelly Belly → Discovery Kingdom → Garberville",
+   acts:[{t:"8:00am",e:"🍳",x:"Breakfast at hotel"},
+    {t:"9:00am",e:"🍬",x:"Jelly Belly Factory Tour, Fairfield (free, 1 hr)"},
+    {t:"10:30am",e:"🎡",x:"Six Flags Discovery Kingdom, Vallejo (5-6 hrs) ✅ Passes + meal plan + parking covered"},
+    {t:"4:30pm",e:"🚗",x:"Drive north to Garberville (~3 hrs via Hwy 101)"},
+    {t:"7:30pm",e:"🌲",x:"Arrive Garberville — check in"}],
+   seed:{status:"booked",hn:"Best Western Plus Humboldt House Inn",pay:"cash",
+    cost:"286.73",rooms:1,conf:"152312644",notes:"Best Western property — manage in Best Western Rewards app. Single suite with 3 queen beds. $286.73 total. Free breakfast ✅. ⚠️ Hot tub inoperable — pool still available.",laundry:"✅ Guest laundry facility on site"},
+   note:"✅ CONFIRMED #152312644 — Single suite with 3 queen beds. Free breakfast ✅ Pool ✅. ⚠️ Hot tub is inoperable — heads up for the group.",
+   excSeed:[],diningSeed:[
+     {id:"d6_sfdk",name:"Six Flags Discovery Kingdom — Meal Plan",addr:"1001 Fairgrounds Dr, Vallejo, CA 94589",res:"walkIn",notes:"✅ Meal plan covers 2 meals per person (4-hr gap required). Use Meal 1 at lunch, Meal 2 mid-afternoon.",meal:"lunch"},
+     {id:"d6_elcora",name:"El Cora Restaurant",addr:"445 Conger St, Garberville, CA 95542",res:"walkIn",notes:"Authentic family-run Mexican — quesobirria tacos, wet burritos, green enchiladas. Fast, generous, affordable. Open 11am-9pm.",meal:"dinner"},
+     {id:"d6_nacho",name:"Nacho Mama",addr:"Garberville, CA 95542",res:"walkIn",notes:"TexMex — Hang Ten Nachos, surfing burrito, shady back patio. Fun atmosphere, local favorite, very affordable.",meal:"dinner"},
+   ]},
+  {num:7,date:"Wed, Jun 17",nights:1,route:"Garberville → Avenue of Giants → Eureka → Hwy 299 → Redding",
+   acts:[{t:"Morning",e:"🍳",x:"Free breakfast at Best Western Plus"},
+    {t:"9:00am",e:"🌲",x:"Avenue of the Giants — take your time! Founders Grove, Immortal Tree, Shrine Drive-Thru Tree. Pull over as much as you like."},
+    {t:"10:30am",e:"🌀",x:"🛑 ROADSIDE STOP: Confusion Hill, Piercy — gravity-defying shack since 1949! Walk on walls, water runs uphill, your eyes lie to you. $5/adult $4/kid. Right on US-101 — 75001 US Hwy 101."},
+    {t:"11:30am",e:"⛽",x:"⛽ COSTCO GAS: Eureka — 1006 W Wabash Ave, Eureka, CA 95501. Fill up here before heading east — no Costco between here and Redding!"},
+    {t:"12:00pm",e:"🥪",x:"Grab lunch in Eureka before turning east on Hwy 299"},
+    {t:"12:30pm",e:"🚗",x:"Head east on Hwy 299 toward Redding — scenic Trinity River canyon drive (~3 hrs). ⚠️ Twisty with steep drop-offs, follow the Trinity River. Fine for Transit van. Don't drive after dark."},
+    {t:"3:30pm",e:"🏙️",x:"Arrive Redding — check in Fairfield Marriott"},
+    {t:"4:30pm",e:"🌉",x:"Sundial Bridge at Turtle Bay — stunning free pedestrian bridge over Sacramento River, great photo stop"},
+    {t:"5:30pm",e:"🚶",x:"Turtle Bay Exploration Park stroll along river"},
+    {t:"6:30pm",e:"🍽️",x:"Dinner in Redding — Woody's Brewing or C.R. Gibbs"}],
+   seed:{status:"booked",hn:"Fairfield by Marriott Inn & Suites Redding",pay:"marriott",
+    cost:"0",rooms:2,conf:"81331570 / 81331578",notes:"74,000 Marriott points for 2 double queen rooms. Conf #1: 81331570 | Conf #2: 81331578. Call ahead for late check-in.",laundry:"✅ On-site laundry + same-day dry cleaning"},
+   note:"⭐ 74,000 Marriott points — 2 double queen rooms. Confirmations: 81331570 + 81331578. | 🚗 ROUTE: Go north to Eureka on 101, then east on Hwy 299. Same drive time as Hwy 36 (~3h 20m) but MUCH safer for Transit van — Hwy 36 is a 'goat trail' with one-lane stretches, no services, not recommended for large vehicles. Hwy 299 follows the Trinity River — twisty but well-maintained and doable for big vehicles.",
+   excSeed:[],diningSeed:[
+     {id:"d7_eur",name:"Grab lunch in Eureka",addr:"Eureka, CA 95501",res:"walkIn",notes:"Fill up at Costco Eureka (1006 W Wabash Ave) then grab food before turning east on Hwy 299. Last real town before Redding.",meal:"lunch"},
+     {id:"d7_woody",name:"Woody's Brewing Co.",addr:"1257 Oregon St, Redding, CA 96001",res:"walkIn",notes:"Family-owned brewery — great burgers, house-made tots, handcrafted beers. Casual and welcoming. Closed Mondays.",meal:"dinner"},
+     {id:"d7_gibbs",name:"C.R. Gibbs American Grille",addr:"2300 Hilltop Dr, Redding, CA 96002",res:"walkIn",notes:"Classic American comfort food, 43+ years in business. Full bar, 28 beers on draft. Family friendly.",meal:"dinner"},
+   ]},
+  {num:8,date:"Thu, Jun 18",nights:1,route:"Redding → Burney Falls → Subway Cave → Lassen → Auburn",
+   acts:[
+    {t:"7:00am",e:"🚗",x:"Depart Redding — early start, big day!"},
+    {t:"7:00am",e:"⛽",x:"⛽ COSTCO GAS: Redding — 1300 Dana Dr. Fill up now — no Costco near Lassen or Burney Falls!"},
+    {t:"8:00am",e:"💧",x:"McArthur-Burney Falls State Park (~1 hr). Loop trail, stunning 129ft falls. ~$10 CA State Park day use fee — NOT covered by ATB Pass (CA State Parks are separate)."},
+    {t:"9:15am",e:"🎬",x:"(Optional 10-min detour): Stand By Me bridge — Eagle Mountain Lane, Burney. Barricaded but visible + graffiti. Search 'Bridge from Stand By Me' on Google Maps."},
+    {t:"9:30am",e:"🌋",x:"Subway Cave Lava Tubes, Old Station (45 min). FREE. Pitch black — 46°F. ⚠️ FLASHLIGHTS REQUIRED. Devil's Doorway → Lucifer's Cul-de-sac → The Sanctum → Rattlesnake Collapse. Sturdy shoes + jacket needed."},
+    {t:"10:30am",e:"🚗",x:"Drive south on Hwy 89 to Lassen SW Entrance (~30 min)"},
+    {t:"11:00am",e:"📋",x:"CHECK road status at nps.gov/lavo — follow PLAN A or PLAN B below"},
+    {t:"11:00am",e:"🅰️",x:"━━ PLAN A: MAIN ROAD OPEN ━━ Enter SW Entrance (Hwy 36 side). Kohm Yah-mah-nee Visitor Center (15 min) → Sulphur Works boiling mud pots (20 min) → drive 7 miles up to Bumpass Hell trailhead (20 min drive) → Bumpass Hell hike 3mi round trip (2 hrs including basin boardwalk time) → Lake Helen viewpoint (10 min) → Lassen Peak scenic vista (10 min) → Devastated Area (20 min) → Manzanita Lake 1.6mi loop (45 min) → exit NW entrance. Drive to Auburn ~2.5 hrs. Arrive Auburn ~5:45pm."},
+    {t:"11:00am",e:"🅱️",x:"━━ PLAN B: ROAD STILL CLOSED (most likely Jun 18) ━━ SW side first: Enter SW Entrance → Kohm Yah-mah-nee VC (15 min) → Sulphur Works (20 min) → drive to road closure point, turn around. Drive park exterior Hwy 36 → Hwy 44 → NW Entrance (~45 min). NW side: Devastated Area viewpoints (20 min) → Manzanita Lake 1.6mi flat loop — stunning Lassen Peak reflection (45 min) → Loomis Museum (20 min). Exit NW entrance. Drive to Auburn ~2.5 hrs. Arrive Auburn ~4:30pm — earlier finish!"},
+    {t:"11:00am",e:"⚡",x:"PLAN A DETAIL — SW Entrance stops: Kohm Yah-mah-nee VC open 9am-5pm. Sulphur Works is 2 miles in, right off the road — boiling pools, fumaroles, steam vents. Always accessible regardless of upper road status."},
+    {t:"1:00pm",e:"🥾",x:"PLAN A DETAIL — Bumpass Hell hike (if trailhead reachable): 3mi round trip, 1.5-2 hrs with time in the basin. Largest hydrothermal area in the park — boardwalk through boiling springs, mud pots, sulfur vents. ⚠️ Average opens July 4 weekend — verify at nps.gov/lavo June 4."},
+    {t:"3:00pm",e:"🌲",x:"PLAN A DETAIL — Devastated Area (15 min drive from Bumpass) → Manzanita Lake 1.6mi flat loop (45 min). Beautiful Lassen Peak reflection in still water. Exit NW entrance → Auburn."},
+    {t:"11:00am",e:"☁️",x:"PLAN B DETAIL — Sulphur Works is the star of Plan B. Even without the main road, the hydrothermal action here is genuinely spectacular — boiling mud pots, steam vents, sulfur smell. Board the 0.3mi accessible path from the parking area."},
+    {t:"11:45am",e:"🚗",x:"PLAN B DETAIL — Drive park exterior to NW entrance: Exit SW → Hwy 36 east → Hwy 89 north through Old Station → NW entrance at Manzanita Lake. ~45 min drive."},
+    {t:"12:30pm",e:"🌲",x:"PLAN B DETAIL — NW Entrance: Devastated Area (1980 volcanic blast zone, eerie interpretive signs, 20 min) → Manzanita Lake loop 1.6mi flat trail (45 min). Best early-morning photos but still beautiful midday. Loomis Museum (20 min)."},
+    {t:"2:00pm",e:"🚗",x:"PLAN B — Exit NW entrance → Hwy 89/44 → I-80 → Auburn (~2.5 hrs). Arrive Auburn ~4:30pm."},
+    {t:"5:00pm",e:"🏨",x:"Arrive Best Western Golden Key Auburn — check in (Plan A ~5:45pm / Plan B ~4:30pm)"},
+    {t:"5:30pm",e:"🗿",x:"🛑 ROADSIDE STOP: Ken Fox's Great Statues of Auburn — Gold Miner at Old Town I-80 off-ramp. Free!"},
+    {t:"7:00pm",e:"🍽️",x:"Dinner in Auburn — Auburn Alehouse or Monkey Cat"}],
+   seed:{status:"booked",hn:"Best Western Golden Key Auburn",pay:"cash",
+    cost:"164.62",rooms:2,conf:"2458410520",notes:"Best Western property — manage in Best Western Rewards app. NON-REFUNDABLE. $164.62/room × 2 rooms. Confirmation: 2458410520.",laundry:"✅ Coin laundry — $1.50 wash / $1.00 dry · 7am–10pm"},
+   note:"⚠️ NON-REFUNDABLE Auburn — Conf: 2458410520. | ✅ ATB Pass covers Lassen NP entry. Burney Falls ~$10 separate CA State Park fee. | 🔦 PACK FLASHLIGHTS for Subway Cave — one per person, phone lights not enough! | 📋 CHECK nps.gov/lavo around June 4 for road status. Historical data: road opened Jun 27 (2025), Jun 20 (2024), Jul 1 (2023) — all heavy snow years like 2026 likely to be. Sulphur Works + Manzanita Lake guaranteed regardless. Bumpass Hell typically opens around July 4 — unlikely to be open Jun 18. PLAN A (road open) arrives Auburn ~5:45pm. PLAN B (road closed) arrives Auburn ~4:30pm.",
+   excSeed:[],diningSeed:[
+     {id:"d8_lassen",name:"Lassen NP Manzanita Lake Camper Store",addr:"Manzanita Lake, Lassen Volcanic NP, CA 96063",res:"walkIn",notes:"Basic snacks, sandwiches, drinks inside the park. Convenient — or pack your own food for this hiking day.",meal:"lunch"},
+     {id:"d8_alehouse",name:"Auburn Alehouse",addr:"289 Washington St, Auburn, CA 95603",res:"walkIn",notes:"Award-winning craft brewery in historic Old Town Auburn. Great burgers, pub food, outdoor patio with courthouse views.",meal:"dinner"},
+     {id:"d8_monkey",name:"The Monkey Cat",addr:"805 Lincoln Way, Auburn, CA 95603",res:"needed",notes:"Popular Auburn local favorite — steaks, seafood, tacos, diverse menu. Cozy downtown setting with patio. Closed Mon/Sun.",meal:"dinner"},
+   ]},
+  {num:9,date:"Fri, Jun 19",nights:2,route:"Auburn → Roseville → Coloma → Placerville → Sutter Creek → Columbia → Groveland",
+   acts:[
+    {t:"7:30am",e:"🍳",x:"Breakfast in Auburn — Old Town stroll, stretch the legs"},
+    {t:"8:15am",e:"⛽",x:"⛽ COSTCO GAS: Roseville — 6750 Stanford Ranch Rd (15 min from Auburn). Fill the tank completely — no Costco anywhere near Groveland or Yosemite!"},
+    {t:"8:45am",e:"🚗",x:"Drive to Coloma on Hwy 49 (~30 min from Roseville area)"},
+    {t:"9:15am",e:"⛏️",x:"Marshall Gold Discovery State Historic Park, Coloma — Sutter's Mill replica, gold panning on the American River, James Marshall statue, museum (~1.5 hrs). $8/vehicle CA State Park fee."},
+    {t:"10:45am",e:"🚗",x:"Drive south on Hwy 49 to Placerville (~20 min, 10 miles)"},
+    {t:"11:05am",e:"🪢",x:"Placerville 'Hangtown' stop (~35-40 min) — stroll Main Street, Bell Tower, Hangman's Tree bar, old soda works building. Quick but worthwhile."},
+    {t:"11:45am",e:"🚗",x:"Drive south on Hwy 49 toward Amador County (~40 min to Sutter Creek, winding road — take your time!)"},
+    {t:"12:25pm",e:"🏘️",x:"Amador City + Sutter Creek back-to-back (~25 min combined) — two tiny consecutive gold rush towns right on the highway. Great photo stops, ice cream, stretch the legs. Smallest incorporated city in CA!"},
+    {t:"1:00pm",e:"🚗",x:"Continue south on Hwy 49 → Hwy 88 → Hwy 49 to Columbia (~50 min from Sutter Creek)"},
+    {t:"1:50pm",e:"🏛️",x:"Columbia State Historic Park (~2 hrs) — stagecoach ride, panning for gold, blacksmith shop, Nelson's Candy Kitchen, saloons, old-time photo studio. Car-free main street! Lunch at Columbia House Restaurant."},
+    {t:"3:50pm",e:"🛒",x:"Quick grocery stop in Sonora (~10 min south of Columbia on Hwy 49) — stock up for BBQ dinner and breakfast at Big Creek Hideaway!"},
+    {t:"4:15pm",e:"🚗",x:"Drive to Groveland via Hwy 108/120 (~40 min from Sonora)"},
+    {t:"5:00pm",e:"🏠",x:"Arrive Big Creek Hideaway — check in, unpack, fire up the BBQ! 🎉"},
+    {t:"6:00pm",e:"🏊",x:"Kids in the heated pool while dinner cooks — perfect first night at the house"},
+    {t:"7:00pm",e:"🍖",x:"BBQ dinner at the house — or Iron Door Saloon (18761 Main St, Groveland) if you'd rather eat out"}],
+   seed:{status:"booked",hn:"Big Creek Hideaway — Groveland (Vacasa)",pay:"cash",
+    cost:"438.57",rooms:1,conf:"BB7H-DVSS",notes:"Vacasa property — manage via Vacasa app/website. Conf: BB7H-DVSS. $877.13 total for 2 nights. 3BR: master + kids room + 4-bunk room. Heated pool ✅ BBQ ✅ Kitchen ✅ W/D ✅ Right on Hwy 120.",laundry:"✅ Washer & dryer confirmed on site"},
+   note:"✅ CONFIRMED #BB7H-DVSS (Vacasa) — $877.13 total (2 nights). 3BR house — master + kids room + bunk room. Heated pool, BBQ, full kitchen, W/D confirmed ✅. Hwy 120 — 45 min to Yosemite Valley.",
+   excSeed:[],diningSeed:[
+     {id:"d9_col",name:"Columbia House Restaurant",addr:"Columbia State Historic Park, Columbia, CA 95310",res:"walkIn",notes:"Old-fashioned American food inside Columbia State Historic Park — gold rush setting, casual, affordable.",meal:"lunch"},
+     {id:"d9_bbq",name:"BBQ at Big Creek Hideaway",addr:"Big Creek Hideaway, Groveland, CA 95321",res:"walkIn",notes:"🏠 Cook at the house! Full kitchen + BBQ grill. Perfect first night — stock up at a grocery store en route.",meal:"dinner"},
+     {id:"d9_iron",name:"Iron Door Saloon",addr:"18761 Main St, Groveland, CA 95321",res:"walkIn",notes:"California's oldest saloon (1852)! Family friendly — burgers, pub food, great atmosphere. Historic landmark.",meal:"dinner"},
+   ]},
+  {num:10,date:"Sat, Jun 20",nights:0,route:"Groveland → Yosemite Valley → Groveland",
+   acts:[{t:"7:30am",e:"🍳",x:"Breakfast at the house"},
+    {t:"8:00am",e:"🚗",x:"Depart Groveland → Yosemite via Hwy 120 (~45 min)"},
+    {t:"8:45am",e:"📸",x:"Tunnel View — iconic Valley overlook"},
+    {t:"9:00am",e:"🌊",x:"Bridalveil Fall — short easy walk"},
+    {t:"9:30am",e:"🧗",x:"El Capitan meadow stroll"},
+    {t:"9:50am",e:"🚌",x:"Park at Curry Village → shuttle to Happy Isles (stop 16)"},
+    {t:"10:00am",e:"🥾",x:"Vernal Fall Mist Trail — splits at footbridge. VERY WET! Bring change of clothes!"},
+    {t:"1:00pm",e:"🏛️",x:"Yosemite Village lunch"},
+    {t:"2:00pm",e:"🏨",x:"Ahwahnee Hotel lobby walk-through"},
+    {t:"3:00pm",e:"🌊",x:"Yosemite Falls lower trail"},
+    {t:"4:00pm",e:"🚗",x:"Drive back to Groveland (~45 min)"},
+    {t:"5:00pm",e:"🏊",x:"Pool + hot tub at house"},
+    {t:"7:00pm",e:"🍖",x:"BBQ dinner at house"}],
+   seed:{status:"booked",hn:"Big Creek Hideaway (Night 2 — included in booking)",pay:"cash",
+    cost:"0",rooms:1,conf:"BB7H-DVSS",notes:"Vacasa property. Included in 2-night Big Creek Hideaway booking from Day 9. Conf: BB7H-DVSS.",laundry:"✅ Washer & dryer confirmed on site"},
+   note:"✅ Night included in Big Creek Hideaway booking. 🏔️ America the Beautiful Pass covers Yosemite entry — no timed entry needed in 2026! ⚠️ Mist Trail: bring full change of clothes for EVERYONE.",
+   excSeed:[],diningSeed:[
+     {id:"d10_deg",name:"Degnan's Kitchen",addr:"Yosemite Village, Yosemite Valley, CA 95389",res:"walkIn",notes:"Pizza, salads, sandwiches inside Yosemite Valley. Casual grab-and-go. Most affordable in-park option.",meal:"lunch"},
+     {id:"d10_deli",name:"Yosemite Valley Lodge Village Deli",addr:"Yosemite Village, Yosemite Valley, CA 95389",res:"walkIn",notes:"Quick sandwiches and snacks — cheapest in-park eating. Great for a quick refuel between hikes.",meal:"lunch"},
+     {id:"d10_gate",name:"Gateway Tapas & Spirits",addr:"18933 Hwy 120, Groveland, CA 95321",res:"none",notes:"Lovely post-Yosemite dinner spot — tapas, cocktails, kale and farro salad rave reviews. Great atmosphere.",meal:"dinner"},
+     {id:"d10_coc",name:"Cocina Michoacana",addr:"18990 Hwy 120, Groveland, CA 95321",res:"walkIn",notes:"Local Mexican favorite — bold flavors, generous portions, fast service. Great value after a big Yosemite day.",meal:"dinner"},
+   ]},
+  {num:11,date:"Sun, Jun 21",nights:1,route:"Groveland → Tuolumne → Mono Lake → Mammoth 🎂 → 395 → Valencia",
+   acts:[{t:"7:30am",e:"🚗",x:"Depart Groveland — straight onto Hwy 120 east toward Tioga Pass"},
+    {t:"9:45am",e:"🌿",x:"Tuolumne Meadows arrival"},
+    {t:"10:00am",e:"🥾",x:"Soda Springs hike (1.5 hrs) — carbonated springs, Parsons Lodge, Cathedral Peak views"},
+    {t:"11:30am",e:"🏔️",x:"Olmsted Point — granite dome views"},
+    {t:"12:00pm",e:"🚗",x:"Cross Tioga Pass, descend east side"},
+    {t:"12:45pm",e:"🌊",x:"Mono Lake — tufa towers, ancient landscape (30-45 min)"},
+    {t:"1:30pm",e:"🚗",x:"Drive to Mammoth (~45 min)"},
+    {t:"1:30pm",e:"⛽",x:"⛽ GAS WARNING: Fill up in Lee Vining or Mammoth Lakes — gas is expensive here, no Costco anywhere near. Nearest Costco is Santa Clarita (~280 miles south). Top up before Hwy 395 south run."},
+    {t:"2:15pm",e:"🎂",x:"Arrive Mammoth Lakes — HAPPY 20th BIRTHDAY JARED! 🎉"},
+    {t:"2:30pm",e:"🌋",x:"Devils Postpile + Rainbow Falls ✅ CONFIRMED — Itinerary #423847675. Shuttle: 3 adults × $15 + 4 kids × $7 = $73"},
+    {t:"5:00pm",e:"🍜",x:"🎂 Birthday dinner — Gojira Ramen & Sushi ✅ (452 Old Mammoth Rd Ste 109) — Jared's pick!"},
+    {t:"7:00pm",e:"🚗",x:"Drive south on Hwy 395"},
+    {t:"8:00pm",e:"📸",x:"Alabama Hills / Lone Pine — cinematic rocky formations"},
+    {t:"9:30pm",e:"🏨",x:"Arrive Embassy Suites Valencia — check in"}],
+   seed:{status:"booked",hn:"Embassy Suites by Hilton Valencia",pay:"hilton",
+    cost:"199.76",rooms:2,conf:"73447330119297",notes:"Hilton property — manage in Hilton Honors app. Booked via Expedia. Itinerary: 73447330119297. $399.52 total for 2 rooms.",laundry:"✅ Laundry facilities + valet laundry service"},
+   note:"🎂 JARED'S 20th BIRTHDAY! 🍜 Dinner confirmed at Gojira Ramen & Sushi 5:00pm — 452 Old Mammoth Rd Ste 109, (760) 965-0080. | 🌋 Devils Postpile shuttle ✅ CONFIRMED — Itinerary #423847675, Sun Jun 21. 3 adults × $15 + 4 kids × $7 = $73 total. | 🏨 Expedia: 73447330119297.",
+   excSeed:[{id:"e11_dp_v2",name:"Devils Postpile Shuttle ✅ #423847675",emoji:"🌋",adultCost:15,childCost:7,numAdults:3,numChildren:4,total:73}],
+   diningSeed:[
+     {id:"d11_mono",name:"Picnic at Mono Lake / Lee Vining",addr:"Lee Vining, CA 93541",res:"walkIn",notes:"Grab supplies at Nicely's Restaurant or a gas mart in Lee Vining before the lake stop. Casual roadside lunch.",meal:"lunch"},
+     {id:"d11_gojira",name:"Gojira Ramen & Sushi 🎂 5:00pm ✅",addr:"452 Old Mammoth Rd Ste 109, Mammoth Lakes, CA 93546",res:"made",notes:"Jared's birthday dinner pick! Ramen, sushi, poke bowls, boba. Fun + fast-paced. (760) 965-0080. Open daily 11am-9pm.",meal:"dinner"},
+     {id:"d11_mogul",name:"The Mogul Restaurant",addr:"1528 Tavern Rd, Mammoth Lakes, CA 93546",res:"none",notes:"Backup option — steaks, prime rib, grill-at-table. (760) 934-6789.",meal:"dinner"},
+     {id:"d11_tav",name:"Mammoth Tavern",addr:"587 Old Mammoth Rd, Mammoth Lakes, CA 93546",res:"none",notes:"Backup option — happy hour 4-5:30pm, burgers, short rib grilled cheese.",meal:"dinner"},
+   ]},
+  {num:12,date:"Mon, Jun 22",nights:0,route:"Valencia → Six Flags Magic Mountain → Irvine 🏠",
+   acts:[{t:"Morning",e:"🍳",x:"Breakfast at Embassy Suites"},
+    {t:"9:30am",e:"⛽",x:"⛽ COSTCO GAS: Santa Clarita — 18649 Via Princessa, Santa Clarita CA 91387. Fill up before Magic Mountain or after — right on the way home to Irvine!"},
+    {t:"10:00am",e:"🎢",x:"Six Flags Magic Mountain — full day ✅ Passes + meal plan + parking covered"},
+    {t:"Evening",e:"🏠",x:"Drive home to Irvine — end of an epic trip! 🎉"}],
+   seed:{status:"booked",hn:"Home — no hotel needed",pay:"cash",
+    cost:"0",rooms:0,conf:"",notes:"Six Flags passes, meal plan, and parking all covered. Drive home!"},
+   note:"✅ Six Flags passes + meal plans + parking all covered. No hotel tonight — driving home to Irvine!",
+   excSeed:[],diningSeed:[
+     {id:"d12_sfmm",name:"Six Flags Magic Mountain — Meal Plan",addr:"26101 Magic Mountain Pkwy, Valencia, CA 91355",res:"walkIn",notes:"✅ Meal plan covers 2 meals per person (4-hr gap required). Use at the park — no need to pay for lunch!",meal:"lunch"},
+     {id:"d12_home",name:"🏠 Home — Pizza Night!",addr:"Irvine, CA",res:"walkIn",notes:"You made it! Order pizza, celebrate 12 epic days, and collapse. You've earned it. 🎉",meal:"dinner"},
+   ]},
+];
+
+const KEY='ca_rt_2026_v4';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch{return{};}}
+function persist(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch{}}
+let DATA=load();
+
+function getDayData(n){
+  const day=DAYS.find(d=>d.num===n);
+  if(!day) return {};
+  const s=day.seed;
+  const defaults={status:s.status||'unbooked',hn:s.hn||'',pay:s.pay||'cash',
+    cost:s.cost||'',rooms:s.rooms??2,conf:s.conf||'',notes:s.notes||'',laundry:s.laundry||'',
+    customHotels:[],excursions:(day.excSeed||[]).map(e=>({...e})),
+    dining:(day.diningSeed||[]).map(d=>({...d}))};
+  if(!DATA[`d${n}`]) return defaults;
+  const saved=DATA[`d${n}`];
+  // Merge: use saved data but always ensure seed excursions/dining appear if not already present
+  const savedExcIds=new Set((saved.excursions||[]).map(e=>e.id));
+  const savedDinIds=new Set((saved.dining||[]).map(d=>d.id));
+  const mergedExc=[...(saved.excursions||[]),...(day.excSeed||[]).filter(e=>!savedExcIds.has(e.id))];
+  const mergedDin=[...(saved.dining||[]),...(day.diningSeed||[]).filter(d=>!savedDinIds.has(d.id))];
+  return{...defaults,...saved,excursions:mergedExc,dining:mergedDin};
+}
+function saveDay(n,d){DATA[`d${n}`]=d;persist(DATA);}
+
+function buildCard(day){
+  const s=getDayData(day.num);
+  const status=s.status||'unbooked';
+  const card=document.createElement('div');
+  card.className=`day-card ${status}`;
+  card.dataset.dayNum=day.num;
+  card.dataset.status=status;
+
+  const sb=status==='booked'
+    ?`<span class="badge b-booked">✓ Booked</span>`
+    :status==='pending'
+    ?`<span class="badge b-pending">⏳ Pending</span>`
+    :`<span class="badge b-unbooked">✗ Not Booked</span>`;
+
+  const rooms=s.rooms??1;
+  const costN=parseFloat(s.cost)||0;
+  const isPts=PTS_PAYMENTS.includes(s.pay);
+  let cd='';
+  if(costN>0){
+    if(isPts) cd=`<div class="dcost">${Math.round(costN*rooms).toLocaleString()}<span class="csub">pts·${rooms>0?rooms+'rm':''}</span></div>`;
+    else cd=`<div class="dcost">$${(costN*rooms).toFixed(0)}<span class="csub">/nt·${rooms>0?rooms+'rm':''}</span></div>`;
+  }
+  const pb=s.pay?`<span class="badge b-${s.pay}">${PL[s.pay]||s.pay}</span>`:'';
+  const nl=day.nights>0?`${day.nights} night${day.nights>1?'s':''}`:'included';
+
+  card.innerHTML=`
+  <div class="day-hdr" onclick="toggleCard(${day.num})">
+    <div class="dnum">${String(day.num).padStart(2,'0')}</div>
+    <div><div class="ddate">${day.date} · ${nl}</div><div class="droute">${day.route}</div></div>
+    <div class="dright">${sb}${cd}${pb}<div class="expand-ic">▼</div></div>
+  </div>
+  <div class="day-body">
+    <div>
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div class="stitle">📋 Day Itinerary</div>
+        <span class="sec-ic">▼</span>
+      </div>
+      <div class="sec-body" style="max-height:2000px;">
+        <ul class="act-list">${day.acts.map(a=>`<li class="act-item"><span class="atime">${a.t}</span><span class="aemoji">${a.e}</span><span>${a.x}</span></li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="hpanel">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div class="stitle">🏨 Hotel & Booking</div>
+        <span class="sec-ic">▼</span>
+      </div>
+      <div class="sec-body" style="max-height:2000px;">
+      ${day.note?`<div class="sp-note"><strong>Note:</strong> ${day.note}</div>`:''}
+      ${s.laundry?`<div style="display:flex;align-items:center;gap:.4rem;padding:.38rem .65rem;background:rgba(61,122,82,.07);border:1px solid rgba(61,122,82,.2);border-radius:4px;font-size:.72rem;color:#2d5a3d;"><span>🧺</span><span><strong>Laundry:</strong> ${s.laundry}</span></div>`:''}
+      <div class="ch-container" id="ch-${day.num}"></div>
+      <button class="ahtog" id="tog-${day.num}" onclick="toggleAH(${day.num})"><span class="ti">+</span> Add / Change Hotel</button>
+      <div class="ahform" id="ahf-${day.num}">
+        <div style="font-size:.67rem;color:var(--muted);margin-bottom:.18rem;">Enter hotel details:</div>
+        <div class="frow"><div class="fgrp" style="grid-column:1/-1;"><label>Hotel Name</label><input type="text" id="cn-${day.num}" placeholder="e.g. Hampton Inn"></div></div>
+        <div class="frow">
+          <div class="fgrp"><label>Rating (optional)</label><input type="text" id="cr-${day.num}" placeholder="4.3"></div>
+          <div class="fgrp"><label>URL (optional)</label><input type="text" id="cu-${day.num}" placeholder="https://..."></div>
+        </div>
+        <div class="fgrp"><label>Notes</label><input type="text" id="cno-${day.num}" placeholder="Free breakfast, pool, etc."></div>
+        <button class="ah-addbtn" onclick="addCH(${day.num})">+ Add Hotel</button>
+      </div>
+      <div class="hform">
+        <div class="frow">
+          <div class="fgrp"><label id="clbl-${day.num}">${isPts?'Points per Night':'Cost per Night ($)'}</label>
+            <input type="number" id="cost-${day.num}" placeholder="${isPts?'e.g. 25000':'0'}" value="${s.cost||''}" oninput="updateRT(${day.num});updateStats()"></div>
+          <div class="fgrp"><label>Confirmation #</label><input type="text" id="conf-${day.num}" placeholder="ABC123" value="${s.conf||''}"></div>
+        </div>
+        <div class="fgrp"><label>Payment Method</label>
+          <div class="pay-grid" id="pay-${day.num}">
+            ${Object.keys(PL).map(p=>`<button class="pbtn ${p}${s.pay===p?' sel':''}" onclick="selPay(${day.num},'${p}',this)">${PL[p]}</button>`).join('')}
+          </div>
+        </div>
+        <div class="fgrp"><label>Rooms</label>
+          <div class="rooms-row">
+            ${[1,2,3].map(r=>`<button class="rbtn${(s.rooms??1)===r?' sel':''}" onclick="selRooms(${day.num},${r},this)">${r}</button>`).join('')}
+            <span class="rtotal" id="rt-${day.num}"></span>
+          </div>
+        </div>
+        <div class="fgrp"><label>Notes</label><textarea id="notes-${day.num}" placeholder="Confirmation details, cancellation policy, parking...">${s.notes||''}</textarea></div>
+        <div class="fgrp"><label>Booking Status</label>
+          <div class="stog">
+            <button class="sbtn booked-btn${status==='booked'?' active':''}" onclick="setStatus(${day.num},'booked')">✓ Booked</button>
+            <button class="sbtn pending-btn${status==='pending'?' active':''}" onclick="setStatus(${day.num},'pending')">⏳ Pending</button>
+            <button class="sbtn unbooked-btn${status==='unbooked'?' active':''}" onclick="setStatus(${day.num},'unbooked')">✗ Not Booked</button>
+          </div>
+        </div>
+        <button class="save-btn" style="display:none;" onclick="saveDay_fn(${day.num})">Save</button>
+      </div><!-- end hotel sec-body -->
+    </div>
+    <div class="exc-sec">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div class="stitle">🎟️ Excursions & Activities</div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <span class="exc-dtotal" id="et-${day.num}">$0</span>
+          <span class="sec-ic">▼</span>
+        </div>
+      </div>
+      <div class="sec-body" style="max-height:2000px;">
+      <div class="exc-list" id="el-${day.num}"></div>
+      <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.28rem;font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">
+        <span style="flex:2;min-width:130px;">Activity</span>
+        <span style="width:76px;">$/Adult</span><span style="width:76px;">$/Child</span>
+        <span style="width:65px;"># Adults</span><span style="width:65px;"># Kids</span>
+        <span style="width:138px;">Category</span>
+      </div>
+      <div class="exc-add">
+        <input type="text" class="xinp xi-name" id="en-${day.num}" placeholder="Activity name">
+        <input type="number" class="xinp xi-cost" id="ea-${day.num}" placeholder="$ adult">
+        <input type="number" class="xinp xi-cost" id="ec-${day.num}" placeholder="$ kid">
+        <input type="number" class="xinp xi-pax" id="ena-${day.num}" placeholder="# adults" value="2" min="0">
+        <input type="number" class="xinp xi-pax" id="enc-${day.num}" placeholder="# kids" value="5" min="0">
+        <select class="xinp xi-cat" id="ecat-${day.num}">
+          <option value="🎢">🎢 Theme Park</option><option value="🏛️">🏛️ Museum/Attraction</option>
+          <option value="🥾">🥾 Tour/Excursion</option><option value="🎟️">🎟️ Event/Show</option>
+          <option value="🚗">🚗 Transport/Fuel</option><option value="🛍️">🛍️ Shopping</option>
+          <option value="🎡">🎡 Activity</option><option value="📝">📝 Other</option>
+        </select>
+        <button class="xadd-btn" onclick="addExc(${day.num})">+ Add</button>
+      </div>
+      </div><!-- end exc sec-body -->
+    </div>
+    <div class="din-sec">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div class="stitle">🍴 Meals & Restaurants</div>
+        <span class="sec-ic">▼</span>
+      </div>
+      <div class="sec-body" style="max-height:3000px;">
+      <div class="meal-tabs" id="mtabs-${day.num}">
+        <button class="meal-tab active" onclick="switchMealTab(${day.num},'breakfast',this)">🌅 Breakfast</button>
+        <button class="meal-tab" onclick="switchMealTab(${day.num},'lunch',this)">☀️ Lunch</button>
+        <button class="meal-tab" onclick="switchMealTab(${day.num},'dinner',this)">🌙 Dinner</button>
+      </div>
+      <div id="mp-${day.num}-breakfast" class="meal-panel">
+        <div class="din-list" id="dl-${day.num}-breakfast"></div>
+        <div class="meal-add-row">
+          <input type="text" class="xinp xi-name" id="dn-${day.num}-breakfast" placeholder="Restaurant / spot name">
+          <input type="text" class="xinp din-addr-inp" id="da-${day.num}-breakfast" placeholder="Address">
+          <select class="xinp din-res-sel" id="dr-${day.num}-breakfast">
+            <option value="none">No reservation</option><option value="needed">⚠️ Needed</option>
+            <option value="made">✅ Reserved</option><option value="walkIn">🚶 Walk-in</option>
+          </select>
+          <input type="text" class="xinp din-notes-inp" id="dno-${day.num}-breakfast" placeholder="Notes (cuisine, hours, price...)">
+          <button class="xadd-btn" onclick="addDining(${day.num},'breakfast')">+ Add</button>
+        </div>
+      </div>
+      <div id="mp-${day.num}-lunch" class="meal-panel" style="display:none;">
+        <div class="din-list" id="dl-${day.num}-lunch"></div>
+        <div class="meal-add-row">
+          <input type="text" class="xinp xi-name" id="dn-${day.num}-lunch" placeholder="Restaurant / spot name">
+          <input type="text" class="xinp din-addr-inp" id="da-${day.num}-lunch" placeholder="Address">
+          <select class="xinp din-res-sel" id="dr-${day.num}-lunch">
+            <option value="none">No reservation</option><option value="needed">⚠️ Needed</option>
+            <option value="made">✅ Reserved</option><option value="walkIn">🚶 Walk-in</option>
+          </select>
+          <input type="text" class="xinp din-notes-inp" id="dno-${day.num}-lunch" placeholder="Notes (cuisine, hours, price...)">
+          <button class="xadd-btn" onclick="addDining(${day.num},'lunch')">+ Add</button>
+        </div>
+      </div>
+      <div id="mp-${day.num}-dinner" class="meal-panel" style="display:none;">
+        <div class="din-list" id="dl-${day.num}-dinner"></div>
+        <div class="meal-add-row">
+          <input type="text" class="xinp xi-name" id="dn-${day.num}-dinner" placeholder="Restaurant / spot name">
+          <input type="text" class="xinp din-addr-inp" id="da-${day.num}-dinner" placeholder="Address">
+          <select class="xinp din-res-sel" id="dr-${day.num}-dinner">
+            <option value="none">No reservation</option><option value="needed">⚠️ Needed</option>
+            <option value="made">✅ Reserved</option><option value="walkIn">🚶 Walk-in</option>
+          </select>
+          <input type="text" class="xinp din-notes-inp" id="dno-${day.num}-dinner" placeholder="Notes (cuisine, hours, price...)">
+          <button class="xadd-btn" onclick="addDining(${day.num},'dinner')">+ Add</button>
+        </div>
+      </div>
+      </div><!-- end meals sec-body -->
+    </div>
+    <div style="grid-column:1/-1;padding-top:.75rem;border-top:2px solid var(--border);margin-top:.25rem;">
+      <button class="save-btn" onclick="saveDay_fn(${day.num})">💾 Save This Day</button>
+    </div>
+  </div>`;
+  return card;
+}
+
+function toggleCard(n){document.querySelector(`[data-day-num="${n}"]`).classList.toggle('expanded');}
+function expandAll(){document.querySelectorAll('.day-card').forEach(c=>c.classList.add('expanded'));}
+function collapseAll(){document.querySelectorAll('.day-card').forEach(c=>c.classList.remove('expanded'));}
+function filterDays(f,btn){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.day-card').forEach(c=>{c.style.display=(f==='all'||c.dataset.status===f)?'':'none';});
+}
+
+function getPC(el){const cs=['marriott','ihg','chase-pts','chase','hilton','wyndham','expedia','cash'];return cs.find(c=>el.classList.contains(c))||'cash';}
+
+function selPay(n,p,el){
+  document.getElementById(`pay-${n}`).querySelectorAll('.pbtn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  const isPts=PTS_PAYMENTS.includes(p);
+  const lbl=document.getElementById(`clbl-${n}`);
+  if(lbl) lbl.textContent=isPts?'Points per Night':'Cost per Night ($)';
+  updateRT(n);updateStats();
+}
+function selRooms(n,r,el){
+  document.querySelector(`[data-day-num="${n}"]`).querySelectorAll('.rbtn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');updateRT(n);updateStats();
+}
+function updateRT(n){
+  const card=document.querySelector(`[data-day-num="${n}"]`);
+  const rb=card?.querySelector('.rbtn.sel');
+  const rooms=rb?parseInt(rb.textContent):1;
+  const cost=parseFloat(document.getElementById(`cost-${n}`)?.value||0);
+  const payEl=card?.querySelector('.pbtn.sel');
+  const p=payEl?getPC(payEl):'';
+  const isPts=PTS_PAYMENTS.includes(p);
+  const te=document.getElementById(`rt-${n}`);
+  if(!te) return;
+  if(cost>0){
+    te.innerHTML=isPts
+      ?`× ${rooms} rm${rooms>1?'s':''} = <strong>${Math.round(cost*rooms).toLocaleString()} pts/nt</strong>`
+      :`× ${rooms} rm${rooms>1?'s':''} = <strong>$${(cost*rooms).toFixed(0)}/nt</strong>`;
+  } else { te.textContent=`× ${rooms} rm${rooms>1?'s':''}`; }
+}
+function setStatus(n,status){
+  const card=document.querySelector(`[data-day-num="${n}"]`);
+  card.className=`day-card ${status} expanded`;card.dataset.status=status;
+  card.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
+  card.querySelector(`.${status}-btn`)?.classList.add('active');
+  updateStats();
+}
+function saveDay_fn(n){
+  const card=document.querySelector(`[data-day-num="${n}"]`);
+  const status=card.dataset.status;
+  const payEl=card.querySelector('.pbtn.sel');
+  const pay=payEl?getPC(payEl):'cash';
+  const rb=card.querySelector('.rbtn.sel');
+  const rooms=rb?parseInt(rb.textContent):1;
+  const cost=document.getElementById(`cost-${n}`)?.value||'';
+  const conf=document.getElementById(`conf-${n}`)?.value||'';
+  const notes=document.getElementById(`notes-${n}`)?.value||'';
+  const ex=getDayData(n);
+  saveDay(n,{...ex,status,pay,rooms,cost,conf,notes});
+  const btn=card.querySelector('.save-btn:not([style*="display:none"])');
+  if(btn){btn.textContent='✓ Saved!';btn.style.background='var(--sage)';
+  setTimeout(()=>{btn.textContent='💾 Save This Day';btn.style.background='';},1500);}
+  updateStats();
+}
+
+function toggleAH(n){
+  document.getElementById(`ahf-${n}`)?.classList.toggle('open');
+  document.getElementById(`tog-${n}`)?.classList.toggle('open');
+}
+function addCH(n){
+  const name=document.getElementById(`cn-${n}`)?.value.trim();
+  if(!name){alert('Please enter a hotel name.');return;}
+  const rating=document.getElementById(`cr-${n}`)?.value.trim();
+  const url=document.getElementById(`cu-${n}`)?.value.trim();
+  const note=document.getElementById(`cno-${n}`)?.value.trim();
+  const id=`ch_${n}_${Date.now()}`;
+  const s=getDayData(n);
+  if(!s.customHotels) s.customHotels=[];
+  s.customHotels.push({id,name,rating,url,note});
+  saveDay(n,s);
+  renderCH(n,{id,name,rating,url,note});
+  ['cn','cr','cu','cno'].forEach(p=>{const el=document.getElementById(`${p}-${n}`);if(el) el.value='';});
+  document.getElementById(`ahf-${n}`)?.classList.remove('open');
+  document.getElementById(`tog-${n}`)?.classList.remove('open');
+}
+function renderCH(n,h){
+  const c=document.getElementById(`ch-${n}`);if(!c) return;
+  const el=document.createElement('div');
+  el.className='hotelopt';el.id=`ch-el-${h.id}`;
+  el.innerHTML=`<div style="flex:1;min-width:0;"><strong>${h.name}</strong><span class="cust-badge">Custom</span>${h.rating?`<span class="stars" style="margin-left:4px;">⭐${h.rating}</span>`:''}${h.url?`<a href="${h.url}" target="_blank" style="font-size:.63rem;color:var(--sky);margin-left:5px;">🔗</a>`:''}${h.note?`<div class="osub">${h.note}</div>`:''}</div><button class="rm-hbtn" onclick="removeCH(${n},'${h.id}')" title="Remove">✕</button>`;
+  c.appendChild(el);
+}
+function removeCH(n,id){
+  if(!confirm('Remove this hotel?')) return;
+  const s=getDayData(n);s.customHotels=(s.customHotels||[]).filter(h=>h.id!==id);
+  saveDay(n,s);document.getElementById(`ch-el-${id}`)?.remove();
+}
+function loadCH(n){const s=getDayData(n);(s.customHotels||[]).forEach(h=>renderCH(n,h));}
+
+function addExc(n){
+  const name=document.getElementById(`en-${n}`)?.value.trim();
+  if(!name){alert('Please enter an activity name.');return;}
+  const ac=parseFloat(document.getElementById(`ea-${n}`)?.value)||0;
+  const cc=parseFloat(document.getElementById(`ec-${n}`)?.value)||0;
+  const na=parseInt(document.getElementById(`ena-${n}`)?.value)||0;
+  const nc=parseInt(document.getElementById(`enc-${n}`)?.value)||0;
+  const emoji=document.getElementById(`ecat-${n}`)?.value||'📝';
+  const total=ac*na+cc*nc;
+  const id=`e${n}_${Date.now()}`;
+  const exc={id,name,emoji,adultCost:ac,childCost:cc,numAdults:na,numChildren:nc,total};
+  const s=getDayData(n);
+  if(!s.excursions) s.excursions=[];
+  s.excursions.push(exc);saveDay(n,s);
+  renderExc(n,exc);
+  document.getElementById(`en-${n}`).value='';
+  document.getElementById(`ea-${n}`).value='';
+  document.getElementById(`ec-${n}`).value='';
+  document.getElementById(`ena-${n}`).value='2';
+  document.getElementById(`enc-${n}`).value='5';
+  updateET(n);updateStats();
+}
+function renderExc(n,e){
+  const list=document.getElementById(`el-${n}`);if(!list) return;
+  const el=document.createElement('div');
+  el.className='exc-item';el.id=`ee-${e.id}`;
+  let bd='';
+  if(e.adultCost>0&&e.numAdults>0) bd+=`${e.numAdults} adults@$${e.adultCost}`;
+  if(e.childCost>=0&&e.numChildren>0) bd+=(bd?' + ':'')+`${e.numChildren} kids@$${e.childCost}`;
+  el.innerHTML=`<span class="xemoji">${e.emoji}</span><span class="xname">${e.name}</span><span class="xbrkd">${bd}</span><span class="xamount">$${(e.total||0).toLocaleString()}</span><button class="xrm" onclick="removeExc(${n},'${e.id}')" title="Remove">✕</button>`;
+  list.appendChild(el);
+}
+function removeExc(n,id){
+  const s=getDayData(n);s.excursions=(s.excursions||[]).filter(e=>e.id!==id);
+  saveDay(n,s);document.getElementById(`ee-${id}`)?.remove();
+  updateET(n);updateStats();
+}
+function loadExc(n){const s=getDayData(n);(s.excursions||[]).forEach(e=>renderExc(n,e));updateET(n);}
+function updateET(n){
+  const s=load()[`d${n}`]||getDayData(n);
+  const t=(s.excursions||[]).reduce((sum,e)=>sum+(e.total||0),0);
+  const el=document.getElementById(`et-${n}`);
+  if(el) el.textContent=t>0?`$${t.toLocaleString()}`:'$0';
+}
+
+function switchMealTab(n,meal,btn){
+  document.getElementById(`mtabs-${n}`).querySelectorAll('.meal-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['breakfast','lunch','dinner'].forEach(m=>{
+    document.getElementById(`mp-${n}-${m}`).style.display=m===meal?'flex':'none';
+  });
+}
+function addDining(n,meal){
+  const name=document.getElementById(`dn-${n}-${meal}`)?.value.trim();
+  if(!name){alert('Please enter a restaurant name.');return;}
+  const addr=document.getElementById(`da-${n}-${meal}`)?.value.trim();
+  const res=document.getElementById(`dr-${n}-${meal}`)?.value||'none';
+  const notes=document.getElementById(`dno-${n}-${meal}`)?.value.trim();
+  const id=`din_${n}_${meal}_${Date.now()}`;
+  const item={id,name,addr,res,notes,meal};
+  const s=getDayData(n);if(!s.dining) s.dining=[];
+  s.dining.push(item);saveDay(n,s);renderDining(n,item);
+  document.getElementById(`dn-${n}-${meal}`).value='';
+  document.getElementById(`da-${n}-${meal}`).value='';
+  document.getElementById(`dr-${n}-${meal}`).value='none';
+  document.getElementById(`dno-${n}-${meal}`).value='';
+}
+function renderDining(n,d){
+  const meal=d.meal||'dinner';
+  const list=document.getElementById(`dl-${n}-${meal}`);if(!list) return;
+  const el=document.createElement('div');el.className='din-item';el.id=`di-${d.id}`;
+  const resLabels={none:'No reservation',needed:'⚠️ Needed',made:'✅ Reserved',walkIn:'🚶 Walk-in'};
+  const resClass={none:'none',needed:'needed',made:'made',walkIn:'walkIn'};
+  const mapsUrl=d.addr?`https://maps.google.com/?q=${encodeURIComponent(d.addr)}`:'';
+  el.innerHTML=`<span class="din-name">🍽️ ${d.name}</span>
+    <span class="din-addr">${d.addr?`<a href="${mapsUrl}" target="_blank">📍 ${d.addr}</a>`:''}</span>
+    <span class="din-res ${resClass[d.res]||'none'}">${resLabels[d.res]||'—'}</span>
+    <span class="din-notes">${d.notes||''}</span>
+    <button class="din-rm" onclick="removeDining(${n},'${d.id}')" title="Remove">✕</button>`;
+  list.appendChild(el);
+}
+function removeDining(n,id){
+  const s=getDayData(n);s.dining=(s.dining||[]).filter(d=>d.id!==id);
+  saveDay(n,s);document.getElementById(`di-${id}`)?.remove();
+}
+function loadDining(n){const s=getDayData(n);(s.dining||[]).forEach(d=>renderDining(n,d));}
+
+function updateStats(){
+  let booked=0,pending=0,totalHotel=0,totalSaved=0,totalExc=0;
+  const bookable=DAYS.filter(d=>d.nights>0).length;
+  DAYS.forEach(day=>{
+    if(day.nights===0) return;
+    const s=getDayData(day.num);
+    const card=document.querySelector(`[data-day-num="${day.num}"]`);
+    const status=card?.dataset.status||s.status||'unbooked';
+    if(status==='booked') booked++;
+    else if(status==='pending') pending++;
+    const rb=card?.querySelector('.rbtn.sel');
+    const rooms=rb?parseInt(rb.textContent):(s.rooms??1);
+    const cost=parseFloat(document.getElementById(`cost-${day.num}`)?.value||s.cost||0);
+    const payEl=card?.querySelector('.pbtn.sel');
+    const pay=payEl?getPC(payEl):(s.pay||'cash');
+    const isPts=PTS_PAYMENTS.includes(pay);
+    const nightCost=cost*Math.max(rooms,1)*(day.nights||1);
+    if(!isPts) totalHotel+=nightCost;
+    else totalSaved+=nightCost;
+    if(pay==='chase') totalSaved+=Math.min(250,nightCost);
+  });
+  DAYS.forEach(day=>{
+    const s=getDayData(day.num);
+    totalExc+=(s.excursions||[]).reduce((sum,e)=>sum+(e.total||0),0);
+  });
+  const remaining=bookable-booked-pending;
+  const grand=totalHotel+totalExc;
+  document.getElementById('s-booked').textContent=booked;
+  document.getElementById('s-pending').textContent=pending;
+  document.getElementById('s-rem').textContent=remaining;
+  document.getElementById('s-hotel').textContent=`$${Math.round(totalHotel).toLocaleString()}`;
+  document.getElementById('s-saved').textContent=`$${Math.round(totalSaved).toLocaleString()}`;
+  document.getElementById('s-exc').textContent=`$${Math.round(totalExc).toLocaleString()}`;
+  document.getElementById('s-grand').textContent=`$${Math.round(grand).toLocaleString()}`;
+  document.getElementById('hdr-booked').textContent=`${booked}/${bookable}`;
+  document.getElementById('hdr-cost').textContent=`$${Math.round(totalHotel).toLocaleString()}`;
+  document.getElementById('ft-hotel').textContent=`$${Math.round(totalHotel).toLocaleString()}`;
+  document.getElementById('ft-exc').textContent=`$${Math.round(totalExc).toLocaleString()}`;
+  document.getElementById('ft-grand').textContent=`$${Math.round(grand).toLocaleString()}`;
+  document.getElementById('ft-saved').textContent=`$${Math.round(totalSaved).toLocaleString()}`;
+  document.getElementById('ft-booked').textContent=`${booked}/${bookable}`;
+}
+
+function exportData(){
+  const data=load();
+  const json=JSON.stringify(data,null,2);
+  // Create overlay to display the JSON for copying
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;padding:1.5rem;gap:1rem;';
+  overlay.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:#e8b84b;letter-spacing:.06em;">📤 Export Trip Data</div>
+      <button onclick="this.closest('[style]').remove()" style="background:transparent;border:1px solid rgba(255,255,255,0.3);color:white;padding:.4rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;">✕ Close</button>
+    </div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,0.7);line-height:1.6;">
+      <strong style="color:#e8b84b;">Step 1:</strong> Click inside the text box below and press <kbd style="background:rgba(255,255,255,0.15);padding:1px 5px;border-radius:2px;">Ctrl+A</kbd> (or <kbd style="background:rgba(255,255,255,0.15);padding:1px 5px;border-radius:2px;">Cmd+A</kbd> on Mac) to select all, then <kbd style="background:rgba(255,255,255,0.15);padding:1px 5px;border-radius:2px;">Ctrl+C</kbd> to copy.<br>
+      <strong style="color:#e8b84b;">Step 2:</strong> Open a text editor (Notepad, TextEdit, VS Code), paste, and save as <strong>ca_road_trip_2026_backup.json</strong>
+    </div>
+    <textarea id="exportJson" readonly style="flex:1;background:#0d1117;color:#6db87a;font-family:monospace;font-size:.72rem;padding:1rem;border:1px solid rgba(201,146,42,.4);border-radius:4px;resize:none;outline:none;">${json}</textarea>
+    <button onclick="const t=document.getElementById('exportJson');t.select();document.execCommand('copy');this.textContent='✅ Copied to clipboard!';setTimeout(()=>this.textContent='📋 Copy to Clipboard',2000);"
+      style="background:#c9922a;color:white;border:none;padding:.6rem 1.2rem;border-radius:4px;font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;">
+      📋 Copy to Clipboard
+    </button>
+  `;
+  document.body.appendChild(overlay);
+  // Auto-select the text
+  setTimeout(()=>{const t=document.getElementById('exportJson');if(t){t.focus();t.select();}},100);
+}
+function importData(){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;padding:1.5rem;gap:1rem;';
+  overlay.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:#e8b84b;letter-spacing:.06em;">📥 Import Trip Data</div>
+      <button onclick="this.closest('[style]').remove()" style="background:transparent;border:1px solid rgba(255,255,255,0.3);color:white;padding:.4rem .8rem;border-radius:3px;cursor:pointer;font-size:.8rem;">✕ Close</button>
+    </div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,0.7);line-height:1.6;">
+      Open your <strong style="color:#e8b84b;">ca_road_trip_2026_backup.json</strong> file in a text editor, select all, copy, then paste it into the box below.
+    </div>
+    <textarea id="importJson" placeholder="Paste your JSON backup here..." style="flex:1;background:#0d1117;color:#6db87a;font-family:monospace;font-size:.72rem;padding:1rem;border:1px solid rgba(201,146,42,.4);border-radius:4px;resize:none;outline:none;"></textarea>
+    <button onclick="
+      const t=document.getElementById('importJson').value.trim();
+      if(!t){alert('Please paste your JSON data first.');return;}
+      try{
+        const d=JSON.parse(t);
+        if(confirm('This will replace all current trip data. Continue?')){
+          localStorage.setItem('ca_rt_2026_v4',JSON.stringify(d));
+          alert('Data imported successfully! Reloading...');
+          location.reload();
+        }
+      }catch(e){alert('Invalid JSON. Please make sure you copied the full backup text.');}
+    " style="background:#3d7a52;color:white;border:none;padding:.6rem 1.2rem;border-radius:4px;font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;cursor:pointer;">
+      📥 Load This Data
+    </button>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById('importJson')?.focus(),100);
+}
+
+function toggleSec(hdr){
+  hdr.classList.toggle('open');
+  const body=hdr.nextElementSibling;
+  if(body.classList.contains('closed')){
+    body.classList.remove('closed');
+    body.style.maxHeight=body.dataset.maxH||'3000px';
+  } else {
+    body.dataset.maxH=body.style.maxHeight||'3000px';
+    body.classList.add('closed');
+  }
+}
+
+function init(){
+  // Clean up old duplicate excursion entries from localStorage
+  const raw=load();
+  if(raw.d11?.excursions){
+    raw.d11.excursions=raw.d11.excursions.filter(e=>e.id!=='e11_dp');
+    persist(raw);DATA=raw;
+  }
+  if(raw.d1?.excursions){
+    raw.d1.excursions=raw.d1.excursions.filter(e=>e.id!=='e1_miss');
+    persist(raw);DATA=raw;
+  }
+  const grid=document.getElementById('daysGrid');
+  DAYS.forEach(day=>{
+    const card=buildCard(day);
+    grid.appendChild(card);
+    loadCH(day.num);loadExc(day.num);loadDining(day.num);updateRT(day.num);
+  });
+  updateStats();
+}
+init();
+</script>
+</body>
+</html>
