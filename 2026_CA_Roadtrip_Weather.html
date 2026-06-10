@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 CA Road Trip — Weather Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#1a1410; --paper:#f5f0e8; --cream:#ede8dc; --gold:#c9922a; --goldL:#e8b84b;
+  --rust:#b5451b; --sage:#3d7a52; --sky:#2d6a8f; --muted:#8a8070;
+  --border:rgba(26,20,16,0.13); --shadow:rgba(26,20,16,0.08);
+  --warm:#e07a2a; --cool:#2d7aaf; --alert:#c0392b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body {
+  background:var(--paper);color:var(--ink);
+  font-family:'DM Sans',sans-serif;min-height:100vh;
+  background-image:
+    radial-gradient(ellipse at 10% 0%,rgba(201,146,42,.08) 0%,transparent 55%),
+    radial-gradient(ellipse at 90% 100%,rgba(45,106,143,.06) 0%,transparent 55%);
+}
+
+/* ── HEADER ── */
+header {
+  background:var(--ink);color:var(--paper);
+  padding:1.8rem 2.5rem 0;position:relative;overflow:hidden;
+}
+header::before {
+  content:'CALIFORNIA';position:absolute;right:-20px;top:50%;
+  transform:translateY(-55%);font-family:'Bebas Neue',sans-serif;
+  font-size:9rem;color:rgba(255,255,255,.025);letter-spacing:.04em;
+  pointer-events:none;white-space:nowrap;
+}
+.hdr-top {display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.trip-title {font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,5vw,4rem);
+  letter-spacing:.05em;line-height:.88;color:var(--paper);}
+.trip-title span {color:var(--goldL);}
+.hdr-meta {text-align:right;font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.12em;color:rgba(245,240,232,.45);line-height:2.2;}
+.hdr-meta strong {color:var(--goldL);display:block;font-size:.9rem;}
+
+/* ── TAB NAV ── */
+.tab-nav {background:var(--ink);display:flex;align-items:stretch;gap:0;
+  padding:0 2.5rem;border-bottom:2px solid var(--gold);}
+.tab-nav a {display:flex;align-items:center;gap:.45rem;padding:.6rem 1.2rem;
+  font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;text-decoration:none;
+  color:rgba(245,240,232,.4);border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:all .15s;}
+.tab-nav a:hover {color:rgba(245,240,232,.75);}
+.tab-nav a.active {color:var(--goldL);border-bottom-color:var(--gold);}
+.tab-nav .trip-id {font-family:'Bebas Neue',sans-serif;font-size:1rem;
+  color:var(--goldL);letter-spacing:.06em;margin-right:1rem;
+  display:flex;align-items:center;padding:.5rem 0;
+  border-right:1px solid rgba(255,255,255,.1);padding-right:1.2rem;}
+
+/* ── SUMMARY STRIP ── */
+.summary-strip {
+  background:var(--ink);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:1px;border-top:1px solid rgba(255,255,255,.07);margin-top:1.4rem;
+}
+.ss-stat {background:rgba(245,240,232,.04);padding:.65rem .75rem;text-align:center;}
+.ss-n {font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--goldL);line-height:1;}
+.ss-l {font-size:.55rem;text-transform:uppercase;letter-spacing:.12em;
+  color:rgba(245,240,232,.4);margin-top:.2rem;}
+
+/* ── CONTAINER ── */
+.container {max-width:1100px;margin:0 auto;padding:2rem 1.5rem 6rem;}
+
+/* ── SECTION HEADER ── */
+.section-hdr {
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.08em;
+  color:var(--ink);margin:2rem 0 1rem;padding-bottom:.5rem;
+  border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:.6rem;
+}
+
+/* ── DAY CARDS ── */
+.days-grid {display:flex;flex-direction:column;gap:.65rem;}
+.day-card {
+  background:white;border:1.5px solid var(--border);border-radius:6px;
+  overflow:hidden;box-shadow:0 2px 10px var(--shadow);
+  display:grid;grid-template-columns:72px 1fr auto;
+  transition:box-shadow .2s;
+}
+.day-card:hover {box-shadow:0 4px 20px rgba(26,20,16,.12);}
+.day-card.hot  {border-left:4px solid var(--rust);}
+.day-card.cool {border-left:4px solid var(--sky);}
+.day-card.mild {border-left:4px solid var(--sage);}
+.day-card.fog  {border-left:4px solid var(--muted);}
+
+/* Day number column */
+.dc-num {
+  background:var(--ink);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:.75rem .5rem;
+}
+.dc-num .dn {font-family:'Bebas Neue',sans-serif;font-size:2.2rem;
+  color:var(--goldL);line-height:1;}
+.dc-num .dd {font-size:.5rem;text-transform:uppercase;letter-spacing:.12em;
+  color:rgba(245,240,232,.4);margin-top:.15rem;text-align:center;}
+
+/* Main content */
+.dc-body {padding:.75rem 1rem;min-width:0;}
+.dc-location {font-family:'DM Serif Display',serif;font-size:1.05rem;
+  color:var(--ink);line-height:1.2;margin-bottom:.2rem;}
+.dc-location .sub {font-family:'DM Sans',sans-serif;font-size:.68rem;
+  color:var(--muted);font-style:normal;display:block;margin-top:.1rem;
+  text-transform:uppercase;letter-spacing:.08em;}
+.dc-condition {display:flex;align-items:center;gap:.4rem;margin:.35rem 0;
+  font-size:.78rem;color:var(--ink);}
+.dc-condition .icon {font-size:1.1rem;}
+.dc-note {font-size:.72rem;color:var(--muted);line-height:1.5;
+  padding:.35rem .55rem;background:rgba(201,146,42,.06);
+  border-left:2px solid var(--gold);border-radius:0 3px 3px 0;margin-top:.4rem;}
+.dc-note strong {color:var(--gold);}
+.dc-note.alert {background:rgba(192,57,43,.06);border-left-color:var(--alert);}
+.dc-note.alert strong {color:var(--alert);}
+
+/* Temp column */
+.dc-temp {
+  padding:.75rem 1rem;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.2rem;
+  border-left:1px solid var(--border);min-width:80px;flex-shrink:0;
+}
+.dc-temp .hi {font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;}
+.dc-temp .lo {font-size:.72rem;color:var(--muted);}
+.dc-temp .label {font-size:.5rem;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-top:.1rem;}
+.hot  .dc-temp .hi {color:var(--rust);}
+.cool .dc-temp .hi {color:var(--sky);}
+.mild .dc-temp .hi {color:var(--sage);}
+.fog  .dc-temp .hi {color:var(--muted);}
+
+/* ── WATCH ITEMS ── */
+.watch-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.65rem;}
+.watch-card {
+  background:white;border:1.5px solid var(--border);border-radius:6px;
+  padding:.85rem 1rem;box-shadow:0 2px 8px var(--shadow);
+}
+.watch-card.warn {border-left:4px solid var(--gold);}
+.watch-card.alert {border-left:4px solid var(--alert);}
+.watch-card.info {border-left:4px solid var(--sky);}
+.wc-title {font-weight:700;font-size:.82rem;margin-bottom:.3rem;
+  display:flex;align-items:center;gap:.4rem;}
+.wc-body {font-size:.74rem;color:var(--muted);line-height:1.6;}
+
+/* ── PACKING WIDGET ── */
+.pack-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.5rem;}
+.pack-item {background:white;border:1.5px solid var(--border);border-radius:4px;
+  padding:.5rem .75rem;font-size:.76rem;display:flex;align-items:center;gap:.5rem;
+  box-shadow:0 1px 4px var(--shadow);}
+.pack-item .pi {font-size:1rem;flex-shrink:0;}
+
+/* ── OUTLOOK BOX ── */
+.outlook {
+  background:var(--ink);color:var(--paper);border-radius:8px;
+  padding:1.5rem 1.75rem;margin-top:2rem;
+  box-shadow:0 4px 20px rgba(26,20,16,.15);
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;
+}
+.ol-item {}
+.ol-title {font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
+  color:var(--goldL);letter-spacing:.06em;margin-bottom:.4rem;}
+.ol-body {font-size:.74rem;color:rgba(245,240,232,.65);line-height:1.65;}
+
+/* ── FOOTER ── */
+.footer {
+  position:fixed;bottom:0;left:0;right:0;background:var(--ink);
+  padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  border-top:2px solid var(--gold);z-index:100;gap:1rem;
+}
+.footer-title {font-family:'Bebas Neue',sans-serif;font-size:1rem;
+  color:var(--goldL);letter-spacing:.06em;}
+.footer-note {font-size:.65rem;color:rgba(245,240,232,.35);
+  text-transform:uppercase;letter-spacing:.08em;}
+.footer-date {font-size:.65rem;color:var(--gold);text-align:right;}
+
+@media(max-width:640px){
+  .day-card {grid-template-columns:60px 1fr auto;}
+  .outlook {grid-template-columns:1fr;}
+  .dc-temp {min-width:65px;}
+  .dc-temp .hi {font-size:1.6rem;}
+  header {padding:1.2rem 1.25rem 0;}
+  .tab-nav {padding:0 1rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <div class="trip-id">2026 CA Road Trip</div>
+  <a href="2026_CA_Roadtrip_Dashboard.html">📋 Dashboard</a>
+  <a href="2026_CA_Roadtrip_Map.html">🗺 Map</a>
+  <a href="2026_CA_Roadtrip_Checklist.html">✅ Checklist</a>
+  <a href="2026_CA_Roadtrip_Weather.html" class="active">🌤 Weather</a>
+</nav>
+
+<!-- HEADER -->
+<header>
+  <div class="hdr-top">
+    <div class="trip-title">2026 CA Road Trip<br><span>Weather Report</span></div>
+    <div class="hdr-meta">
+      <strong>Jun 11 – 22, 2026</strong>
+      12 Days &nbsp;·&nbsp; 7 Travelers<br>
+      Irvine → Paso Robles → Monterey<br>
+      → SF → Redding → Yosemite → Home
+    </div>
+  </div>
+  <div class="summary-strip">
+    <div class="ss-stat"><div class="ss-n">0</div><div class="ss-l">Rain Days</div></div>
+    <div class="ss-stat"><div class="ss-n" style="color:#e8604c;">95°</div><div class="ss-l">Hottest Day</div></div>
+    <div class="ss-stat"><div class="ss-n" style="color:#4ab8e8;">40°</div><div class="ss-l">Coldest Night</div></div>
+    <div class="ss-stat"><div class="ss-n">☀️</div><div class="ss-l">Overall Outlook</div></div>
+    <div class="ss-stat"><div class="ss-n">12</div><div class="ss-l">Days</div></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- DAY BY DAY -->
+  <div class="section-hdr">🗓 Day-by-Day Forecast</div>
+  <div class="days-grid">
+
+    <div class="day-card hot">
+      <div class="dc-num"><div class="dn">1</div><div class="dd">Thu<br>Jun 11</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Irvine → Santa Barbara → Solvang → Paso Robles<span class="sub">Day 1 · Departure Day</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Sunny and warm all day — perfect driving weather</div>
+        <div class="dc-note">Great day to be on the road. Ostrichland and Solvang will be comfortable and sunny. No jacket needed.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">87°</div><div class="lo">Low 54°</div><div class="label">Paso Robles</div></div>
+    </div>
+
+    <div class="day-card cool">
+      <div class="dc-num"><div class="dn">2</div><div class="dd">Fri<br>Jun 12</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Monterey Bay Aquarium · Cannery Row · 17-Mile Drive<span class="sub">Day 2 · Monterey</span></div>
+        <div class="dc-condition"><span class="icon">🌫️</span> June Gloom — foggy morning, partly cloudy afternoon</div>
+        <div class="dc-note"><strong>Pack layers.</strong> Monterey coast averages 74% humidity in June. Foggy mornings are normal and typically burn off by noon. Ocean temp is a chilly 54°F — no swimming.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">64°</div><div class="lo">Low 50°</div><div class="label">Monterey</div></div>
+    </div>
+
+    <div class="day-card mild">
+      <div class="dc-num"><div class="dn">3</div><div class="dd">Sat<br>Jun 13</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Mystery Spot · Santa Cruz Boardwalk · Watsonville<span class="sub">Day 3 · Santa Cruz Coast</span></div>
+        <div class="dc-condition"><span class="icon">⛅</span> Partly cloudy, warmer than Monterey</div>
+        <div class="dc-note">Good boardwalk weather — warmer than the day before. Mystery Spot at 12:12pm should be comfortable. Light jacket in the morning, t-shirts by afternoon.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">70°</div><div class="lo">Low 53°</div><div class="label">Watsonville</div></div>
+    </div>
+
+    <div class="day-card hot">
+      <div class="dc-num"><div class="dn">4</div><div class="dd">Sun<br>Jun 14</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Gilroy → Six Flags Great America → Walnut Creek<span class="sub">Day 4 · Theme Park Day</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Sunny and warm — inland heat kicks in</div>
+        <div class="dc-note"><strong>Sunscreen essential.</strong> Great America is in Santa Clara — full sun, no shade on most rides. Hats recommended. Six Flags meal plan will be a lifesaver — stay hydrated between meals.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">85°</div><div class="lo">Low 58°</div><div class="label">Walnut Creek</div></div>
+    </div>
+
+    <div class="day-card fog">
+      <div class="dc-num"><div class="dn">5</div><div class="dd">Mon<br>Jun 15</div></div>
+      <div class="dc-body">
+        <div class="dc-location">San Francisco — Alcatraz · Cable Car · Golden Gate<span class="sub">Day 5 · SF Day Trip</span></div>
+        <div class="dc-condition"><span class="icon">🌫️</span> Classic SF fog in the morning, clearing by midday</div>
+        <div class="dc-note"><strong>Jackets for the Alcatraz ferry — mandatory.</strong> The bay crossing at 9:20am will be cold and windy on the water. Ghirardelli ice cream and Golden Gate Bridge will both be clearer and warmer by afternoon. Lombard Street fine by 3pm.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">65°</div><div class="lo">Low 52°</div><div class="label">San Francisco</div></div>
+    </div>
+
+    <div class="day-card mild">
+      <div class="dc-num"><div class="dn">6</div><div class="dd">Tue<br>Jun 16</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Discovery Kingdom → Garberville / Humboldt<span class="sub">Day 6 · Long Drive North</span></div>
+        <div class="dc-condition"><span class="icon">⛅</span> Partly cloudy, comfortable redwood country temps</div>
+        <div class="dc-note">Discovery Kingdom will be warm (inland). The drive north into Humboldt gets noticeably cooler and greener as you approach Garberville. Comfortable evening — note the hot tub at BW Plus is inoperable but pool is open.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">67°</div><div class="lo">Low 52°</div><div class="label">Garberville</div></div>
+    </div>
+
+    <div class="day-card hot">
+      <div class="dc-num"><div class="dn">7</div><div class="dd">Wed<br>Jun 17</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Ave of Giants → Eureka → Hwy 299 → Redding<span class="sub">Day 7 · Redwood Drive</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Cool redwoods → intense heat in Redding</div>
+        <div class="dc-note"><strong>⚠️ Redding heat warning.</strong> Redding is one of California's hottest cities — regularly exceeds 100°F in June. You'll arrive in the afternoon when it's at peak heat. Stay in the van's AC, hydrate constantly. The Ave of Giants will be a pleasant cool contrast earlier in the day.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">95°</div><div class="lo">Low 62°</div><div class="label">Redding</div></div>
+    </div>
+
+    <div class="day-card mild">
+      <div class="dc-num"><div class="dn">8</div><div class="dd">Thu<br>Jun 18</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Burney Falls · Subway Cave · Lassen NP · Auburn<span class="sub">Day 8 · Mountain Day</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Sunny but cool at elevation — big temperature swings</div>
+        <div class="dc-note"><strong>🔦 Subway Cave: 46°F inside regardless of outside temp.</strong> Lassen NP overnight lows drop to the mid-30s to low 40s — layers absolutely needed. Burney Falls will feel refreshing. Auburn arrival in the late afternoon warms back up to 80°F.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">68°</div><div class="lo">Low 40°</div><div class="label">Lassen NP</div></div>
+    </div>
+
+    <div class="day-card hot">
+      <div class="dc-num"><div class="dn">9</div><div class="dd">Fri<br>Jun 19</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Coloma · Placerville · Columbia · Groveland<span class="sub">Day 9 · Gold Country</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Warm inland foothills — sunny all day</div>
+        <div class="dc-note">Beautiful Gold Country weather — warm but not oppressive. Columbia State Historic Park will be classic dry California summer. Big Creek Hideaway pool will feel great in the evening. Good laundry night.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">82°</div><div class="lo">Low 54°</div><div class="label">Groveland</div></div>
+    </div>
+
+    <div class="day-card hot">
+      <div class="dc-num"><div class="dn">10</div><div class="dd">Sat<br>Jun 20</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Yosemite Valley — Tunnel View · Mist Trail · El Cap<span class="sub">Day 10 · Yosemite Day</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Hot and sunny — hotter than normal for late June 2026</div>
+        <div class="dc-note"><strong>Summer 2026 forecast: hotter and drier than normal.</strong> Start early — trailhead by 8:45am before the Valley crowds. Carry at least 2L of water per person. The Mist Trail soaking from Vernal Fall will feel amazing in the heat. Sunscreen for everyone.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">85°</div><div class="lo">Low 55°</div><div class="label">Yosemite</div></div>
+    </div>
+
+    <div class="day-card mild">
+      <div class="dc-num"><div class="dn">11</div><div class="dd">Sun<br>Jun 21</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Tuolumne · Mono Lake · Mammoth Lakes 🎂 · Hwy 395<span class="sub">Day 11 · Jared's 20th Birthday!</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Warm afternoon, cool evening at 8,000ft elevation</div>
+        <div class="dc-note"><strong>Altitude = temperature swings.</strong> Mammoth Lakes sits at 8,000ft — warm and sunny during the afternoon at Devils Postpile, noticeably cooler by birthday dinner time at Gojira Ramen. Perfect evening weather for outdoor seating. Bring light jackets for the kids for the Hwy 395 drive south.</div>
+      </div>
+      <div class="dc-temp"><div class="hi">76°</div><div class="lo">Low 46°</div><div class="label">Mammoth</div></div>
+    </div>
+
+    <div class="day-card hot">
+      <div class="dc-num"><div class="dn">12</div><div class="dd">Mon<br>Jun 22</div></div>
+      <div class="dc-body">
+        <div class="dc-location">Valencia → Six Flags Magic Mountain → Irvine 🏠<span class="sub">Day 12 · Final Day</span></div>
+        <div class="dc-condition"><span class="icon">☀️</span> Hot and sunny — SoCal summer in full force</div>
+        <div class="dc-note"><strong>Hottest theme park day of the trip.</strong> Magic Mountain is in full sun with minimal shade. Sunscreen, hats, and lots of water. Six Flags meal plan covers 2 meals — time them wisely with the 4-hour gap rule. Home by evening!</div>
+      </div>
+      <div class="dc-temp"><div class="hi">90°</div><div class="lo">Low 62°</div><div class="label">Valencia</div></div>
+    </div>
+
+  </div>
+
+  <!-- WATCH ITEMS -->
+  <div class="section-hdr">⚠️ Key Weather Watch Items</div>
+  <div class="watch-grid">
+    <div class="watch-card alert">
+      <div class="wc-title">🌡️ Redding Heat — Day 7</div>
+      <div class="wc-body">Redding regularly hits 95-100°F+ in June. Stay in the van's AC when possible, drink water constantly, and don't linger outside. The cool Eureka coast earlier that morning will feel like a different planet.</div>
+    </div>
+    <div class="watch-card alert">
+      <div class="wc-title">🔦 Subway Cave: 46°F Inside — Day 8</div>
+      <div class="wc-body">Regardless of the outside temperature, Subway Cave stays 46°F year-round. Bring a flashlight and jacket for every person. You'll go from a warm 80°F outside to pitch black and freezing inside.</div>
+    </div>
+    <div class="watch-card warn">
+      <div class="wc-title">🌫️ June Gloom — Days 2 & 5</div>
+      <div class="wc-body">Coastal fog is normal and expected in Monterey and SF. It typically burns off by noon. Morning Alcatraz ferry will be cold and windy on the water — jackets for all 7. Fog doesn't dampen the experience, it's part of the SF atmosphere.</div>
+    </div>
+    <div class="watch-card warn">
+      <div class="wc-title">☀️ Yosemite Heat — Day 10</div>
+      <div class="wc-body">Summer 2026 forecast is hotter and drier than normal with peak heat in late June. Start Mist Trail early, carry 2L+ of water per person. The Vernal Fall soaking is well earned and will feel amazing.</div>
+    </div>
+    <div class="watch-card info">
+      <div class="wc-title">🏔️ Mammoth Altitude — Day 11</div>
+      <div class="wc-body">At 8,000ft, Mammoth sees 20-30°F temperature drops after sunset. Warm afternoon at Devils Postpile, cool birthday dinner. Watch younger kids for altitude headaches — extra water and take it slow at first.</div>
+    </div>
+    <div class="watch-card info">
+      <div class="wc-title">🧊 Lassen Elevation — Day 8</div>
+      <div class="wc-body">Lassen NP overnight lows hit the mid-30s to 40°F in June even when daytime is pleasant. You're only visiting during the day so this mostly affects what to wear — layers you can shed as it warms up.</div>
+    </div>
+  </div>
+
+  <!-- PACKING FOR WEATHER -->
+  <div class="section-hdr">🎒 Weather-Specific Packing</div>
+  <div class="pack-grid">
+    <div class="pack-item"><span class="pi">🧥</span> Light jacket — every person (Days 2, 5, 8, 11)</div>
+    <div class="pack-item"><span class="pi">🔦</span> Flashlight — every person (Day 8 Subway Cave)</div>
+    <div class="pack-item"><span class="pi">🌡️</span> Sunscreen — apply daily, especially Days 4, 9, 10, 12</div>
+    <div class="pack-item"><span class="pi">🧢</span> Hat or cap — sun protection at theme parks and Yosemite</div>
+    <div class="pack-item"><span class="pi">💧</span> Water bottles — refillable, especially at elevation</div>
+    <div class="pack-item"><span class="pi">🕶️</span> Sunglasses — important at Mammoth and Yosemite altitude</div>
+    <div class="pack-item"><span class="pi">👕</span> Layers — mornings cool, afternoons hot inland</div>
+    <div class="pack-item"><span class="pi">👟</span> Hiking shoes — Mist Trail, Lassen, Burney Falls</div>
+    <div class="pack-item"><span class="pi">🩳</span> Extra clothes — Mist Trail soaks everything</div>
+    <div class="pack-item"><span class="pi">💊</span> Motion sickness — Hwy 299 Trinity Canyon is very winding</div>
+    <div class="pack-item"><span class="pi">🩹</span> Blister bandages — theme parks + long hike days</div>
+    <div class="pack-item"><span class="pi">🌬️</span> Lip balm SPF — altitude dries lips fast (Day 11)</div>
+  </div>
+
+  <!-- OVERALL OUTLOOK -->
+  <div class="outlook">
+    <div class="ol-item">
+      <div class="ol-title">☀️ Overall Outlook</div>
+      <div class="ol-body">Outstanding weather window for the entire trip. Zero rain days expected across all 12 stops. California's June is historically its driest month, and 2026 is shaping up to be warmer and drier than normal — great news for your outdoor-heavy itinerary.</div>
+    </div>
+    <div class="ol-item">
+      <div class="ol-title">🌡️ Temperature Range</div>
+      <div class="ol-body">You'll experience everything from a brisk 40°F overnight at Lassen to 95°F in Redding — all in the same week. The key is layering. Cool coastal mornings give way to warm afternoons. High elevation sites (Lassen, Tuolumne, Mammoth) need jackets even in June.</div>
+    </div>
+    <div class="ol-item">
+      <div class="ol-title">🎯 Best Weather Days</div>
+      <div class="ol-body">Days 1, 9, and 12 are perfect weather days — warm, sunny, and exactly what you'd hope for. Day 10 in Yosemite will be hot but manageable if you start early. The coastal fog on Days 2 and 5 is atmospheric, not a problem.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-title">2026 CA Road Trip — Weather Report</div>
+  <div class="footer-note">Forecast based on AccuWeather + historical averages · Jun 8, 2026</div>
+  <div class="footer-date">Departs Thu Jun 11 · Returns Mon Jun 22</div>
+</div>
+
+</body>
+</html>
